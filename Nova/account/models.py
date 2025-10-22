@@ -32,8 +32,9 @@ class Usuario(AbstractUser):
                     self.is_superuser = True
                     self.is_staff = True
                 else:
-                    # ✅ No tocar los flags, deja que Django mantenga el acceso normal
-                    pass       
+                    # Resetear flags cuando no es administrador
+                    self.is_superuser = False
+                    self.is_staff = False
         except Exception:
             pass  # Evita romper el guardado si el rol no existe
         super().save(*args, **kwargs)
