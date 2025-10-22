@@ -7,7 +7,7 @@ from .forms import (
     AlmacenForm, ProveedorForm, CategoriaForm, ProductoForm, RolForm
 )
 from .models import Usuario, Almacen, Proveedor, Categoria, Producto, Rol
-from .decorators import login_required_custom, role_required
+from .decorators import login_required_custom, role_required, _user_has_permission
 from account.models import Usuario
 
 # ====================================================
@@ -92,9 +92,14 @@ def user_logout(request):
 
 @login_required_custom
 def dashboard(request):
+    # Calcular módulos permitidos basados en permisos de "leer"
+    modulos = ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles']
+    modulos_permitidos = [modulo for modulo in modulos if _user_has_permission(request.user, modulo, 'leer')]
+    
     return render(request, 'account/dashboard.html', {
         'username': request.user.username,
-        'rol': request.user.rol
+        'rol': request.user.rol,
+        'modulos_permitidos': modulos_permitidos  # Nuevo contexto
     })
 
 

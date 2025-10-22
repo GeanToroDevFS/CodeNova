@@ -126,12 +126,24 @@
         {% endif %}
 
         <div class="link-container">
-            <a href="{% url 'productos_listar' %}">🗃️ Productos</a>
-            <a href="{% url 'usuarios_listar' %}">👥 Usuarios</a>
-            <a href="{% url 'proveedores_listar' %}">🏢 Proveedores</a>
-            <a href="{% url 'almacenes_listar' %}">🏬 Almacenes</a>
-            <a href="{% url 'categorias_listar' %}">📦 Categorías</a>
-            <a href="{% url 'roles_listar' %}">🔑 Roles</a>
+            {% if 'productos' in modulos_permitidos %}
+                <a href="{% url 'productos_listar' %}">🗃️ Productos</a>
+            {% endif %}
+            {% if 'usuarios' in modulos_permitidos %}
+                <a href="{% url 'usuarios_listar' %}">👥 Usuarios</a>
+            {% endif %}
+            {% if 'proveedores' in modulos_permitidos %}
+                <a href="{% url 'proveedores_listar' %}">🏢 Proveedores</a>
+            {% endif %}
+            {% if 'almacenes' in modulos_permitidos %}
+                <a href="{% url 'almacenes_listar' %}">🏬 Almacenes</a>
+            {% endif %}
+            {% if 'categorias' in modulos_permitidos %}
+                <a href="{% url 'categorias_listar' %}">📦 Categorías</a>
+            {% endif %}
+            {% if 'roles' in modulos_permitidos %}
+                <a href="{% url 'roles_listar' %}">🔑 Roles</a>
+            {% endif %}
         </div>
     </div>
 </body>
