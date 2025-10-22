@@ -1,0 +1,66 @@
+Presentado por:
+Gean Franco Muñoz Toro 2266833-2724
+Natalia Andrea Gonzalez 2255856-2724
+
+Abrir instalar_entorno.bat -- Creara la carpeta "my_StockNova", sin esto no funcionara
+
+
+
+--Dentro de visual Studio Code
+Abrir carpeta
+Seleccionar StockNovC
+
+------------ No necesario si activaste  el instalar_entorno.bat-----
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+----Para montar servidor-- Dentro de la terminal
+
+my_StockNova\Scripts\actívate    --- Para activar
+
+cd .\Nova\    --- Entrar en proyecto
+
+
+python.exe manage.py runserver  --- Correr servidor
+
+--Copiar link
+
+--Pegar en Navegador
+
+
+Según los pasos anteriores veras algo como esto--
+
+
+PS C:\Users\Gfmt\Desktop\Desarrollo de software\ProyectoDesarrolloSoftware\Web de Inventarios\StockNovaC> my_StockNova\Scripts\actívate
+
+(my_StockNova) PS C:\Users\Gfmt\Desktop\Desarrollo de software\ProyectoDesarrolloSoftware\Web de Inventarios\StockNovaC> cd .\Nova\
+
+(my_StockNova) PS C:\Users\Gfmt\Desktop\Desarrollo de software\ProyectoDesarrolloSoftware\Web de Inventarios\StockNovaC\Nova> python.exe manage.py runserver
+
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified some issues:
+
+WARNINGS:
+?: (staticfiles.W004) The directory 'C:\Users\Gfmt\Desktop\Desarrollo de software\ProyectoDesarrolloSoftware\Web de Inventarios\StockNovaC\Nova\static' in the STATICFILES_DIRS setting does not exist.
+
+System check identified 1 issue (0 silenced).
+June 26, 2025 - 17:18:06
+Django version 5.2, using settings 'Nova.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CTRL-BREAK.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/5.2/howto/deployment/
+
+
+---El link que pegaras será este "http://127.0.0.1:8000/"  --Puede Variar
+
+
+
+---En login--
+
+Usuario "admin"
+Contraseña "1234"

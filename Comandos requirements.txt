@@ -1,0 +1,10 @@
+con entorno activado
+
+
+Instalar todas las dependencias usadas
+
+Verifica lo instalado:  " pip list " – Debe mostrar Django 4.2.7 y python-dateutil (y dependencias de Django).
+
+Genera el requirements.txt con pip freeze:
+
+" pip freeze > requirements.txt "

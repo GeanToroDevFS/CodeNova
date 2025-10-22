@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+    <link rel="stylesheet" href="{% static 'account/css/style.css' %}">
+    <style>
+        body {
+            background: #f0f0f0;
+            font-family: 'Jost', sans-serif;
+            margin: 0;
+        }
+
+        /* Barra superior */
+        .topbar {
+            background: #007bff;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .topbar .user-info {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .topbar .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 30px; /* mueve el botón un poco hacia la izquierda */
+        }
+        .topbar .logout-btn:hover {
+            background: #b02a37;
+        }
+
+        /* Contenedor principal del dashboard */
+        .dashboard {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            margin: 100px auto 40px; /* margen superior aumentado para no tapar la barra */
+        }
+
+        .dashboard h2 {
+            margin-bottom: 30px;
+        }
+
+        .dashboard .link-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .dashboard a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            width: 200px;
+            text-align: center;
+        }
+
+        .dashboard a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilos para mensajes */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+        .messages li {
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .messages .success { background: #d4edda; color: #155724; }
+        .messages .error   { background: #f8d7da; color: #721c24; }
+        .messages .warning { background: #fff3cd; color: #856404; }
+        .messages .info    { background: #cce5ff; color: #004085; }
+    </style>
+</head>
+<body>
+    <!-- Barra superior -->
+    <div class="topbar">
+        <div class="user-info">👤 {{ user.username }}</div>
+        <a href="{% url 'logout' %}" class="logout-btn">⏻ Cerrar sesión</a>
+    </div>
+
+    <!-- Contenido del dashboard -->
+    <div class="dashboard">
+        <h2>Bienvenido {{ user.username }}</h2>
+
+        <!-- Aquí sí mostramos mensajes globales -->
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="link-container">
+            <a href="{% url 'productos_listar' %}">🗃️ Productos</a>
+            <a href="{% url 'usuarios_listar' %}">👥 Usuarios</a>
+            <a href="{% url 'proveedores_listar' %}">🏢 Proveedores</a>
+            <a href="{% url 'almacenes_listar' %}">🏬 Almacenes</a>
+            <a href="{% url 'categorias_listar' %}">📦 Categorías</a>
+            <a href="{% url 'roles_listar' %}">🔑 Roles</a>
+        </div>
+    </div>
+</body>
+</html>
