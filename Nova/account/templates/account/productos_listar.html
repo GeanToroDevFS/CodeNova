@@ -10,7 +10,7 @@
     <style>
         body {
             margin: 0;
-            padding-top: 70px; /* espacio para la franja fija */
+            padding-top: 70px;
             font-family: 'Jost', sans-serif;
             background: #f0f0f0;
         }
@@ -36,13 +36,11 @@
             align-items: center;
             gap: 15px;
         }
-
         .topbar .actions {
             display: flex;
             gap: 10px;
-            margin-right: 50px; /* 👈 aquí ajustas cuánto se mueven hacia la izquierda botones home y cerrar sesion */
+            margin-right: 50px;
         }
-
         .topbar a {
             border: none;
             padding: 8px 16px;
@@ -57,14 +55,13 @@
         .topbar .logout-btn { background: #dc3545; }
         .topbar a:hover { opacity: 0.9; }
 
-        /* 🔹 Estilos existentes */
+        /* 🔹 Contenedor principal */
         .container {
             width: 90%;
             max-width: 1200px;
             margin: 30px auto;
             font-family: 'Jost', sans-serif;
         }
-        
         .header {
             display: flex;
             justify-content: space-between;
@@ -73,9 +70,8 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        
         .title { font-size: 24px; color: #333; margin: 0; }
-        
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -86,29 +82,27 @@
             font-weight: bold;
             transition: all 0.3s;
         }
-        
         .btn-primary { background-color: #007bff; color: white; }
         .btn-primary:hover { background-color: #0056b3; transform: translateY(-2px); }
-        
+
         .messages { list-style: none; padding: 0; margin-bottom: 20px; }
         .messages li { padding: 12px 15px; border-radius: 5px; margin-bottom: 10px; }
         .success { background-color: #d4edda; color: #155724; }
         .error { background-color: #f8d7da; color: #721c24; }
-        
+
+        /* 🔹 Tabla */
         .products-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
         .products-table th, 
         .products-table td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
         }
-        
         .products-table th {
             background-color: #f8f9fa;
             font-weight: 600;
@@ -117,9 +111,8 @@
             font-size: 14px;
             letter-spacing: 0.5px;
         }
-        
         .products-table tr:hover { background-color: #f5f8fa; }
-        
+
         .status {
             display: inline-block;
             padding: 4px 10px;
@@ -127,13 +120,13 @@
             font-size: 13px;
             font-weight: 600;
         }
-        
         .status-active { background-color: #e6f7ee; color: #28a745; }
         .status-inactive { background-color: #feecec; color: #dc3545; }
-        
+
         .stock-low { color: #ffc107; font-weight: 600; }
         .stock-critical { color: #dc3545; font-weight: 600; }
-        
+
+        /* 🔹 Acciones */
         .action-links { display: flex; gap: 10px; }
         .action-link {
             display: inline-flex;
@@ -149,10 +142,10 @@
         .edit-link:hover { background-color: #d0e3ff; }
         .delete-link { background-color: #fdecea; color: #dc3545; }
         .delete-link:hover { background-color: #fadbd8; }
-        
+
         .no-products { text-align: center; padding: 30px; color: #6c757d; font-size: 16px; }
         .price { font-weight: 600; color: #28a745; }
-        
+
         @media (max-width: 768px) {
             .products-table { display: block; overflow-x: auto; }
             .header { flex-direction: column; align-items: flex-start; }
@@ -163,7 +156,7 @@
     <!-- 🔹 Franja superior -->
     <div class="topbar">
         <div class="user-info">👤 {{ user.username }}</div>
-        <div class="actions">                                 
+        <div class="actions">
             <a href="{% url 'dashboard' %}" class="home-btn">🏠 Home</a>
             <a href="{% url 'logout' %}" class="logout-btn">⏻ Cerrar sesión</a>
         </div>
@@ -173,11 +166,13 @@
     <div class="container">
         <div class="header">
             <h1 class="title">Gestión de Productos</h1>
-            <a href="{% url 'producto_crear' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Nuevo Producto
-            </a>
+            {% if permisos.crear %}
+                <a href="{% url 'producto_crear' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Producto
+                </a>
+            {% endif %}
         </div>
-        
+
         {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
@@ -185,7 +180,7 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        
+
         <table class="products-table">
             <thead>
                 <tr>
@@ -198,7 +193,9 @@
                     <th>Proveedor</th>
                     <th>Almacén</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+                    {% if permisos.editar or permisos.eliminar %}
+                        <th>Acciones</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -221,12 +218,16 @@
                     </td>
                     <td>
                         <div class="action-links">
-                            <a href="{% url 'producto_editar' producto.id %}" class="action-link edit-link">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <a href="{% url 'producto_eliminar' producto.id %}" class="action-link delete-link">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </a>
+                            {% if permisos.editar %}
+                                <a href="{% url 'producto_editar' producto.id %}" class="action-link edit-link">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                            {% endif %}
+                            {% if permisos.eliminar %}
+                                <a href="{% url 'producto_eliminar' producto.id %}" class="action-link delete-link">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

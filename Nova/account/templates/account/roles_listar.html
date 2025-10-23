@@ -10,12 +10,10 @@
     <style>
         body {
             margin: 0;
-            padding-top: 70px; /* espacio para la franja fija */
+            padding-top: 70px;
             font-family: 'Jost', sans-serif;
             background: #f0f0f0;
         }
-
-        /* 🔹 Franja superior */
         .topbar {
             background: #007bff;
             color: white;
@@ -36,13 +34,11 @@
             align-items: center;
             gap: 15px;
         }
-
         .topbar .actions {
             display: flex;
             gap: 10px;
             margin-right: 50px;
         }
-
         .topbar a {
             border: none;
             padding: 8px 16px;
@@ -57,12 +53,10 @@
         .topbar .logout-btn { background: #dc3545; }
         .topbar a:hover { opacity: 0.9; }
 
-        /* 🔹 Contenedor */
         .container {
             width: 90%;
             max-width: 1000px;
             margin: 30px auto;
-            font-family: 'Jost', sans-serif;
         }
 
         .header {
@@ -74,11 +68,7 @@
             gap: 15px;
         }
 
-        .title {
-            font-size: 24px;
-            color: #333;
-            margin: 0;
-        }
+        .title { font-size: 24px; color: #333; margin: 0; }
 
         .btn {
             display: inline-flex;
@@ -148,19 +138,11 @@
             font-size: 16px;
         }
 
-        /* 🔹 Estado visual */
-        .estado-activo {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .estado-inactivo {
-            color: #dc3545;
-            font-weight: bold;
-        }
+        .estado-activo { color: #28a745; font-weight: bold; }
+        .estado-inactivo { color: #dc3545; font-weight: bold; }
     </style>
 </head>
 <body>
-    <!-- 🔹 Franja superior -->
     <div class="topbar">
         <div class="user-info">👤 {{ user.username }}</div>
         <div class="actions">                               
@@ -169,13 +151,14 @@
         </div>
     </div>
 
-    <!-- 🔹 Contenido -->
     <div class="container">
         <div class="header">
             <h1 class="title">Gestión de Roles</h1>
-            <a href="{% url 'roles_crear' %}" class="btn btn-primary">
-                <i class="fas fa-user-tag"></i> Nuevo Rol
-            </a>
+            {% if permisos.crear %}
+                <a href="{% url 'roles_crear' %}" class="btn btn-primary">
+                    <i class="fas fa-user-tag"></i> Nuevo Rol
+                </a>
+            {% endif %}
         </div>
 
         {% if messages %}
@@ -192,8 +175,10 @@
                     <th>Nombre del Rol</th>
                     <th>Descripción</th>
                     <th>Permisos</th>
-                    <th>Estado</th>  <!-- 🔹 Nueva columna -->
-                    <th>Acciones</th>
+                    <th>Estado</th>
+                    {% if permisos.editar or permisos.eliminar %}
+                        <th>Acciones</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -214,12 +199,16 @@
                     </td>
                     <td>
                         <div class="action-links">
-                            <a href="{% url 'roles_editar' rol.id %}" class="action-link edit-link">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <a href="{% url 'roles_eliminar' rol.id %}" class="action-link delete-link">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </a>
+                            {% if permisos.editar %}
+                                <a href="{% url 'roles_editar' rol.id %}" class="action-link edit-link">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                            {% endif %}
+                            {% if permisos.eliminar %}
+                                <a href="{% url 'roles_eliminar' rol.id %}" class="action-link delete-link">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

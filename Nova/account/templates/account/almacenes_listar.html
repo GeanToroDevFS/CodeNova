@@ -10,7 +10,7 @@
     <style>
         body {
             margin: 0;
-            padding-top: 70px; /* espacio para la franja fija */
+            padding-top: 70px;
             font-family: 'Jost', sans-serif;
             background: #f0f0f0;
         }
@@ -40,7 +40,7 @@
         .topbar .actions {
             display: flex;
             gap: 10px;
-            margin-right: 50px; /* 👈 aquí ajustas cuánto se mueven hacia la izquierda botones home y cerrar sesion */
+            margin-right: 50px;
         }
 
         .topbar a {
@@ -175,9 +175,11 @@
     <div class="container">
         <div class="header">
             <h1 class="title">Gestión de Almacenes</h1>
-            <a href="{% url 'crear_almacen' %}" class="btn btn-primary">
-                <i class="fas fa-warehouse"></i> Nuevo Almacén
-            </a>
+            {% if permisos.crear %}
+                <a href="{% url 'crear_almacen' %}" class="btn btn-primary">
+                    <i class="fas fa-warehouse"></i> Nuevo Almacén
+                </a>
+            {% endif %}
         </div>
         
         {% if messages %}
@@ -197,7 +199,9 @@
                     <th>Capacidad</th>
                     <th>Responsable</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+                    {% if permisos.editar or permisos.eliminar %}
+                        <th>Acciones</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -219,12 +223,16 @@
                     </td>
                     <td>
                         <div class="action-links">
-                            <a href="{% url 'editar_almacen' almacen.id %}" class="action-link edit-link">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <a href="{% url 'eliminar_almacen' almacen.id %}" class="action-link delete-link">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </a>
+                            {% if permisos.editar %}
+                                <a href="{% url 'editar_almacen' almacen.id %}" class="action-link edit-link">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                            {% endif %}
+                            {% if permisos.eliminar %}
+                                <a href="{% url 'eliminar_almacen' almacen.id %}" class="action-link delete-link">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
