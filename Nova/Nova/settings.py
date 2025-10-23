@@ -10,7 +10,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-ki38v=r%##n^x(6=-ylqqgwma!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # ✅ Acepta localhost, 127.0.0.1 y dominios de Render automáticamente
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,codenova-3n9j.onrender.com').split(',')
+
 
 
 INSTALLED_APPS = [
