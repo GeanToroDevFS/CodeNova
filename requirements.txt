@@ -13,4 +13,4 @@ tzdata==2025.2
 gunicorn
 python-dotenv
 psycopg2-binary
-whitenoise==7.1.2
+whitenoise==6.11.0
