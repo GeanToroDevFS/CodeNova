@@ -7,6 +7,10 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-ki38v=r%##n^x(6=-ylqqgwma!h&sd1cxtc(b(!*0tibi)-z#)')
+
+# Confía en el proxy que viene de Render
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # ✅ Acepta localhost, 127.0.0.1 y dominios de Render automáticamente
