@@ -1,0 +1,14 @@
+# Entornos virtuales
+my_StockNova/
+venv/
+__pycache__/
+
+# Archivos de entorno local (NO subir)
+.env
+
+# Archivos temporales o de compilación
+*.pyc
+*.pyo
+*.log
+
+# (Nota: NO ignoramos db.sqlite3 porque queremos subirla)
