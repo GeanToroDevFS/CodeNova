@@ -111,11 +111,18 @@ def dashboard(request):
 @role_required(module='usuarios', action='leer')
 def lista_usuarios(request):
     usuarios = Usuario.objects.all().order_by('username')
+    # Calcular permisos específicos para el usuario
+    permisos = {
+        'leer': _user_has_permission(request.user, 'usuarios', 'leer'),
+        'editar': _user_has_permission(request.user, 'usuarios', 'actualizar'),
+        'eliminar': _user_has_permission(request.user, 'usuarios', 'eliminar'),
+        'crear': _user_has_permission(request.user, 'usuarios', 'crear'),
+    }
     return render(request, 'account/usuarios_listar.html', {
         'usuarios': usuarios,
-        'titulo': 'Lista de Usuarios'
+        'titulo': 'Lista de Usuarios',
+        'permisos': permisos,  
     })
-
 
 @login_required_custom
 @role_required(module='usuarios', action='crear')
@@ -180,10 +187,19 @@ def eliminar_usuario(request, pk):
 @role_required(module='productos', action='leer')
 def productos_listar(request):
     productos = Producto.objects.select_related('categoria', 'proveedor', 'almacen').all().order_by('nombre')
+    # Calcular permisos específicos para el usuario
+    permisos = {
+        'leer': _user_has_permission(request.user, 'productos', 'leer'),
+        'editar': _user_has_permission(request.user, 'productos', 'actualizar'),
+        'eliminar': _user_has_permission(request.user, 'productos', 'eliminar'),
+        'crear': _user_has_permission(request.user, 'productos', 'crear'),
+    }
     return render(request, 'account/productos_listar.html', {
         'productos': productos,
-        'titulo': 'Lista de Productos'
+        'titulo': 'Lista de Productos',
+        'permisos': permisos,
     })
+
 
 
 @login_required_custom
@@ -263,9 +279,17 @@ def producto_eliminar(request, pk):
 @role_required(module='proveedores', action='leer')
 def lista_proveedores(request):
     proveedores = Proveedor.objects.all().order_by('nombre')
+    # Calcular permisos específicos para el usuario
+    permisos = {
+        'leer': _user_has_permission(request.user, 'proveedores', 'leer'),
+        'editar': _user_has_permission(request.user, 'proveedores', 'actualizar'),
+        'eliminar': _user_has_permission(request.user, 'proveedores', 'eliminar'),
+        'crear': _user_has_permission(request.user, 'proveedores', 'crear'),
+    }
     return render(request, 'account/proveedores_listar.html', {
         'proveedores': proveedores,
-        'titulo': 'Lista de Proveedores'
+        'titulo': 'Lista de Proveedores',
+        'permisos': permisos,  # Agregado
     })
 
 
@@ -326,9 +350,17 @@ def eliminar_proveedor(request, pk):
 @role_required(module='almacenes', action='leer')
 def lista_almacenes(request):
     almacenes = Almacen.objects.select_related('responsable').all().order_by('nombre')
+    # Calcular permisos específicos para el usuario
+    permisos = {
+        'leer': _user_has_permission(request.user, 'almacenes', 'leer'),
+        'editar': _user_has_permission(request.user, 'almacenes', 'actualizar'),
+        'eliminar': _user_has_permission(request.user, 'almacenes', 'eliminar'),
+        'crear': _user_has_permission(request.user, 'almacenes', 'crear'),
+    }
     return render(request, 'account/almacenes_listar.html', {
         'almacenes': almacenes,
-        'titulo': 'Lista de Almacenes'
+        'titulo': 'Lista de Almacenes',
+        'permisos': permisos,  # Agregado
     })
 
 
@@ -389,9 +421,17 @@ def eliminar_almacen(request, pk):
 @role_required(module='categorias', action='leer')
 def lista_categorias(request):
     categorias = Categoria.objects.all().order_by('nombre')
+    # Calcular permisos específicos para el usuario
+    permisos = {
+        'leer': _user_has_permission(request.user, 'categorias', 'leer'),
+        'editar': _user_has_permission(request.user, 'categorias', 'actualizar'),
+        'eliminar': _user_has_permission(request.user, 'categorias', 'eliminar'),
+        'crear': _user_has_permission(request.user, 'categorias', 'crear'),
+    }
     return render(request, 'account/categorias_listar.html', {
         'categorias': categorias,
-        'titulo': 'Lista de Categorías'
+        'titulo': 'Lista de Categorías',
+        'permisos': permisos,
     })
 
 
@@ -452,10 +492,19 @@ def eliminar_categoria(request, pk):
 @role_required(module='roles', action='leer')
 def roles_listar(request):
     roles = Rol.objects.all().order_by('nombre')
+    # Calcular permisos específicos para el usuario
+    permisos = {
+        'leer': _user_has_permission(request.user, 'roles', 'leer'),
+        'editar': _user_has_permission(request.user, 'roles', 'actualizar'),
+        'eliminar': _user_has_permission(request.user, 'roles', 'eliminar'),
+        'crear': _user_has_permission(request.user, 'roles', 'crear'),
+    }
     return render(request, 'account/roles_listar.html', {
         'roles': roles,
-        'titulo': 'Lista de Roles'
+        'titulo': 'Lista de Roles',
+        'permisos': permisos, 
     })
+
 
 
 @login_required_custom
