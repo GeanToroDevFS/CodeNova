@@ -11,12 +11,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-ki38v=r%##n^x(6=-ylqqgwma!
 # Confía en el proxy que viene de Render
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+# ⚠️ Producción en Render
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# ✅ Acepta localhost, 127.0.0.1 y dominios de Render automáticamente
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,codenova-3n9j.onrender.com').split(',')
-
-
+# ✅ ALLOWED_HOSTS seguro para Render (acepta cualquier subdominio de tu dominio)
+ALLOWED_HOSTS = ['.codenova-3n9j.onrender.com', '127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'account',  # ¡Asegúrate de que tu app 'account' esté aquí!
+    'account',
 ]
 
 MIDDLEWARE = [
@@ -46,7 +45,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'account/templates'),  # Asegúrate de que Django busque templates aquí
+            os.path.join(BASE_DIR, 'account/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -60,40 +59,27 @@ TEMPLATES = [
     },
 ]
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # Apunta a tu db.sqlite3 existente
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-LANGUAGE_CODE = 'es-es'  # Cambiado a español
+LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "account" / "static",
-]
-
-
+STATICFILES_DIRS = [BASE_DIR / "account" / "static",]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -102,12 +88,9 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 
-# ¡IMPORTANTE! Define tu modelo de usuario personalizado
 AUTH_USER_MODEL = 'account.Usuario'
 
-# ¡IMPORTANTE! Configura el backend de autenticación
 AUTHENTICATION_BACKENDS = [
     'account.backends.CustomAuthBackend', 
     'django.contrib.auth.backends.ModelBackend',
 ]
-
