@@ -1,13 +1,17 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-ki38v=r%##n^x(6=-ylqqgwma!h&sd1cxtc(b(!*0tibi)-z#)'  # Mantén tu clave secreta
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-ki38v=r%##n^x(6=-ylqqgwma!h&sd1cxtc(b(!*0tibi)-z#)')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -30,6 +34,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'Nova.urls'
+WSGI_APPLICATION = 'Nova.wsgi.application'
 
 TEMPLATES = [
     {
@@ -50,7 +55,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Nova.wsgi.application'
 
 DATABASES = {
     'default': {

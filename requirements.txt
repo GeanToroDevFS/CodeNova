@@ -10,3 +10,5 @@ platformdirs==4.5.0
 pytokens==0.1.10
 sqlparse==0.5.3
 tzdata==2025.2
+gunicorn
+python-dotenv
