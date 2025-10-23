@@ -1,0 +1,10 @@
+# Evita subir tu entorno virtual
+my_StockNova/
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Entornos y configuraciones locales
+.env
+*.log
