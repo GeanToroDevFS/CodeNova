@@ -28,6 +28,7 @@
     background: rgba(255,255,255,0.1);
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none; /* ← ESTA LÍNEA ARREGLA EL PROBLEMA */
 }
 
 .reporte-card:hover::before {
@@ -67,6 +68,9 @@
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 2; /* Asegura que esté por encima del ::before */
+    display: inline-block;
 }
 
 .reporte-btn:hover {
