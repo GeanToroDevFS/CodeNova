@@ -6,7 +6,8 @@ from .views import (
     lista_categorias, crear_categoria, editar_categoria, eliminar_categoria,
     lista_almacenes, crear_almacen, editar_almacen, eliminar_almacen,
     productos_listar, producto_crear, producto_editar, producto_eliminar,
-    roles_listar, roles_crear, roles_editar, roles_eliminar,
+    roles_listar, roles_crear, roles_editar, roles_eliminar, informes_listar, inventario_completo,
+    reporte_usuarios, reporte_proveedores, reporte_almacenes, reporte_categorias, reporte_roles,
 )
 
 urlpatterns = [
@@ -49,4 +50,14 @@ urlpatterns = [
     path('roles/nuevo/', roles_crear, name='roles_crear'),
     path('roles/editar/<int:pk>/', roles_editar, name='roles_editar'),
     path('roles/eliminar/<int:pk>/', roles_eliminar, name='roles_eliminar'),
+    
+    #Informes
+    path('informes/', informes_listar, name='informes_listar'),
+    path('informes/inventario/', inventario_completo, name='inventario_completo'),
+    path('informes/usuarios/', reporte_usuarios, name='reporte_usuarios'),
+    path('informes/proveedores/', reporte_proveedores, name='reporte_proveedores'),
+    path('informes/almacenes/', reporte_almacenes, name='reporte_almacenes'),
+    path('informes/categorias/', reporte_categorias, name='reporte_categorias'),
+    path('informes/roles/', reporte_roles, name='reporte_roles'),
+    
 ]
