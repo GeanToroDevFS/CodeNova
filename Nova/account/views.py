@@ -140,7 +140,8 @@ def crear_usuario(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             usuario = form.save(commit=False)
-            usuario.set_password(form.cleaned_data['password1'])  # ✅ se cifra explícitamente
+            usuario.set_password(form.cleaned_data['password1'])
+            usuario.estado = True  # ← FORZAR a activo
             usuario.save()
             messages.success(request, 'Usuario creado exitosamente.')
             return redirect('usuarios_listar')
@@ -218,7 +219,9 @@ def producto_crear(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
-            form.save()
+            producto = form.save(commit=False)
+            producto.estado = True  # ← FORZAR a activo
+            producto.save()
             messages.success(request, 'Producto creado exitosamente.')
             return redirect('productos_listar')
         else:
@@ -311,7 +314,9 @@ def crear_proveedor(request):
     if request.method == 'POST':
         form = ProveedorForm(request.POST)
         if form.is_valid():
-            form.save()
+            proveedor = form.save(commit=False)
+            proveedor.estado = True  # ← FORZAR a activo
+            proveedor.save()
             messages.success(request, 'Proveedor creado exitosamente.')
             return redirect('proveedores_listar')
     else:
@@ -384,7 +389,9 @@ def crear_almacen(request):
     if request.method == 'POST':
         form = AlmacenForm(request.POST)
         if form.is_valid():
-            form.save()
+            almacen = form.save(commit=False)
+            almacen.estado = True  # ← FORZAR a activo
+            almacen.save()
             messages.success(request, 'Almacén creado exitosamente.')
             return redirect('almacenes_listar')
     else:
@@ -457,7 +464,9 @@ def crear_categoria(request):
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
         if form.is_valid():
-            form.save()
+            categoria = form.save(commit=False)
+            categoria.estado = True  # ← FORZAR a activo
+            categoria.save()
             messages.success(request, 'Categoría creada exitosamente.')
             return redirect('categorias_listar')
     else:
@@ -533,8 +542,7 @@ def roles_crear(request):
             rol = form.save(commit=False)
             selected_perms = _collect_selected_permissions(request.POST)
             rol.permisos = ', '.join(selected_perms)
-            # ✅ Guardar estado desde el formulario
-            rol.estado = request.POST.get('estado', 'activo') == 'activo'
+            rol.estado = True  # ← FORZAR a activo
             rol.save()
             messages.success(request, 'Rol creado exitosamente.')
             return redirect('roles_listar')
