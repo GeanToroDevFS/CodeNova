@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.db.models import Count
+from django.db.models import Count, Sum 
 from .forms import (
     LoginForm, CustomUserCreationForm, CustomUserChangeForm,
     AlmacenForm, ProveedorForm, CategoriaForm, ProductoForm, RolForm
@@ -9,6 +9,13 @@ from .forms import (
 from .models import Usuario, Almacen, Proveedor, Categoria, Producto, Rol
 from .decorators import login_required_custom, role_required, _user_has_permission
 from account.models import Usuario
+
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from io import BytesIO
+from django.http import FileResponse
 
 # ====================================================
 # --- Utilidades internas para Roles/Permisos ---
@@ -107,6 +114,7 @@ def dashboard(request):
 # --- CRUD de Usuarios ---
 # ====================================================
 
+#Listar
 @login_required_custom
 @role_required(module='usuarios', action='leer')
 def lista_usuarios(request):
@@ -124,6 +132,7 @@ def lista_usuarios(request):
         'permisos': permisos,  
     })
 
+#Crear
 @login_required_custom
 @role_required(module='usuarios', action='crear')
 def crear_usuario(request):
@@ -145,7 +154,7 @@ def crear_usuario(request):
         'editar': False
     })
 
-
+#Editar
 @login_required_custom
 @role_required(module='usuarios', action='actualizar')
 def editar_usuario(request, pk):
@@ -167,14 +176,15 @@ def editar_usuario(request, pk):
         'editar': True
     })
 
-
+#Eliminar
 @login_required_custom
 @role_required(module='usuarios', action='eliminar')
 def eliminar_usuario(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
     if request.method == 'POST':
-        usuario.delete()
-        messages.success(request, f'Usuario "{usuario.username}" eliminado correctamente.')
+        usuario.estado = False # Cambio para no eliminar, solo desactivar
+        usuario.save()
+        messages.success(request, f'Usuario "{usuario.username}" desactivado correctamente.')
         return redirect('usuarios_listar')
     return render(request, 'account/usuario_confirmar_eliminar.html', {'usuario': usuario})
 
@@ -183,6 +193,7 @@ def eliminar_usuario(request, pk):
 # --- CRUD de Productos ---
 # ====================================================
 
+#Listar
 @login_required_custom
 @role_required(module='productos', action='leer')
 def productos_listar(request):
@@ -200,8 +211,7 @@ def productos_listar(request):
         'permisos': permisos,
     })
 
-
-
+#Crear
 @login_required_custom
 @role_required(module='productos', action='crear')
 def producto_crear(request):
@@ -229,7 +239,7 @@ def producto_crear(request):
         'editar': False
     })
 
-
+#Editar
 @login_required_custom
 @role_required(module='productos', action='actualizar')
 def producto_editar(request, pk):
@@ -259,14 +269,15 @@ def producto_editar(request, pk):
         'editar': True
     })
 
-
+#Eliminar
 @login_required_custom
 @role_required(module='productos', action='eliminar')
 def producto_eliminar(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     if request.method == 'POST':
-        producto.delete()
-        messages.success(request, f'Producto "{producto.nombre}" eliminado correctamente.')
+        producto.estado = False # Cambio para no eliminar, solo desactivar
+        producto.save()
+        messages.success(request, f'Producto "{producto.nombre}" desactivado correctamente.')
         return redirect('productos_listar')
     return render(request, 'account/producto_confirmar_eliminar.html', {'producto': producto})
 
@@ -275,6 +286,7 @@ def producto_eliminar(request, pk):
 # --- CRUD de Proveedores ---
 # ====================================================
 
+#Listar
 @login_required_custom
 @role_required(module='proveedores', action='leer')
 def lista_proveedores(request):
@@ -292,7 +304,7 @@ def lista_proveedores(request):
         'permisos': permisos,  # Agregado
     })
 
-
+#Crear
 @login_required_custom
 @role_required(module='proveedores', action='crear')
 def crear_proveedor(request):
@@ -310,7 +322,7 @@ def crear_proveedor(request):
         'editar': False
     })
 
-
+#Editar
 @login_required_custom
 @role_required(module='proveedores', action='actualizar')
 def editar_proveedor(request, pk):
@@ -330,14 +342,15 @@ def editar_proveedor(request, pk):
         'editar': True
     })
 
-
+#Eliminar
 @login_required_custom
 @role_required(module='proveedores', action='eliminar')
 def eliminar_proveedor(request, pk):
     proveedor = get_object_or_404(Proveedor, pk=pk)
     if request.method == 'POST':
-        proveedor.delete()
-        messages.success(request, f'Proveedor "{proveedor.nombre}" eliminado correctamente.')
+        proveedor.estado = False # Cambio para no eliminar, solo desactivar
+        proveedor.save()
+        messages.success(request, f'Proveedor "{proveedor.nombre}" desactivado correctamente.')
         return redirect('proveedores_listar')
     return render(request, 'account/proveedor_confirmar_eliminar.html', {'proveedor': proveedor})
 
@@ -346,6 +359,7 @@ def eliminar_proveedor(request, pk):
 # --- CRUD de Almacenes ---
 # ====================================================
 
+#Listar
 @login_required_custom
 @role_required(module='almacenes', action='leer')
 def lista_almacenes(request):
@@ -363,7 +377,7 @@ def lista_almacenes(request):
         'permisos': permisos,  # Agregado
     })
 
-
+#Crear
 @login_required_custom
 @role_required(module='almacenes', action='crear')
 def crear_almacen(request):
@@ -381,7 +395,7 @@ def crear_almacen(request):
         'editar': False
     })
 
-
+#Editar
 @login_required_custom
 @role_required(module='almacenes', action='actualizar')
 def editar_almacen(request, pk):
@@ -401,14 +415,15 @@ def editar_almacen(request, pk):
         'editar': True
     })
 
-
+#Eliminar
 @login_required_custom
 @role_required(module='almacenes', action='eliminar')
 def eliminar_almacen(request, pk):
     almacen = get_object_or_404(Almacen, pk=pk)
     if request.method == 'POST':
-        almacen.delete()
-        messages.success(request, f'Almacén "{almacen.nombre}" eliminado correctamente.')
+        almacen.estado = False # Cambio para no eliminar, solo desactivar
+        almacen.save()
+        messages.success(request, f'Almacén "{almacen.nombre}" desactivado correctamente.')
         return redirect('almacenes_listar')
     return render(request, 'account/almacen_confirmar_eliminar.html', {'almacen': almacen})
 
@@ -417,6 +432,7 @@ def eliminar_almacen(request, pk):
 # --- CRUD de Categorías ---
 # ====================================================
 
+#Listar
 @login_required_custom
 @role_required(module='categorias', action='leer')
 def lista_categorias(request):
@@ -434,7 +450,7 @@ def lista_categorias(request):
         'permisos': permisos,
     })
 
-
+#Crear
 @login_required_custom
 @role_required(module='categorias', action='crear')
 def crear_categoria(request):
@@ -452,7 +468,7 @@ def crear_categoria(request):
         'editar': False
     })
 
-
+#Editar
 @login_required_custom
 @role_required(module='categorias', action='actualizar')
 def editar_categoria(request, pk):
@@ -472,14 +488,15 @@ def editar_categoria(request, pk):
         'editar': True
     })
 
-
+#Eliminar
 @login_required_custom
 @role_required(module='categorias', action='eliminar')
 def eliminar_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
-        categoria.delete()
-        messages.success(request, f'Categoría "{categoria.nombre}" eliminada correctamente.')
+        categoria.estado = False # Cambio para no eliminar, solo desactivar
+        categoria.save()
+        messages.success(request, f'Categoría "{categoria.nombre}" desactivada correctamente.')
         return redirect('categorias_listar')
     return render(request, 'account/categoria_confirmar_eliminar.html', {'categoria': categoria})
 
@@ -488,6 +505,7 @@ def eliminar_categoria(request, pk):
 # --- CRUD de Roles ---
 # ====================================================
 
+#Listar
 @login_required_custom
 @role_required(module='roles', action='leer')
 def roles_listar(request):
@@ -505,8 +523,7 @@ def roles_listar(request):
         'permisos': permisos, 
     })
 
-
-
+#Crear
 @login_required_custom
 @role_required(module='roles', action='crear')
 def roles_crear(request):
@@ -537,7 +554,7 @@ def roles_crear(request):
         'editar': False
     })
 
-
+#Editar
 @login_required_custom
 @role_required(module='roles', action='actualizar')
 def roles_editar(request, pk):
@@ -570,14 +587,15 @@ def roles_editar(request, pk):
         'editar': True
     })
 
-
+#Eliminar
 @login_required_custom
 @role_required(module='roles', action='eliminar')
 def roles_eliminar(request, pk):
     rol = get_object_or_404(Rol, pk=pk)
     if request.method == 'POST':
-        rol.delete()
-        messages.success(request, f'Rol "{rol.nombre}" eliminado correctamente.')
+        rol.estado = False # Cambio para no eliminar, solo desactivar
+        rol.save()
+        messages.success(request, f'Rol "{rol.nombre}" desactivado correctamente.')
         return redirect('roles_listar')
     return render(request, 'account/roles_confirmar_eliminar.html', {'rol': rol})
 
@@ -603,4 +621,322 @@ def matriz_roles(request):
         'acciones': acciones,
         'matriz': matriz,
         'titulo': 'Matriz de Permisos'
+    })
+
+
+
+# ====================================================
+# --- Funciones para Reportes ---
+# ====================================================
+@login_required_custom
+@role_required(module='productos', action='leer')  # Asumiendo permisos en productos
+def informes_listar(request):
+    return render(request, 'account/informes_listar.html', {
+        'titulo': 'Módulo de Informes'
+    })
+    
+    
+@login_required_custom
+@role_required(module='productos', action='leer')
+def inventario_completo(request):
+    # Leer parámetros de filtros
+    nombre = request.GET.get("nombre", "").strip()
+    categoria_id = request.GET.get("categoria", "").strip()
+    proveedor_id = request.GET.get("proveedor", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    exportar = request.GET.get("exportar") == "1"
+    # Consulta base con productos activos/inactivos
+    productos = Producto.objects.select_related('categoria', 'proveedor', 'almacen').all()
+    # Aplicar filtros
+    if nombre:
+        productos = productos.filter(nombre__icontains=nombre)
+    if categoria_id:
+        productos = productos.filter(categoria__id=categoria_id)
+    if proveedor_id:
+        productos = productos.filter(proveedor__id=proveedor_id)
+    if estado:
+        productos = productos.filter(estado=(estado == "activo"))
+    # Calcular totales (ej. stock total)
+    total_productos = productos.count()
+    total_stock = productos.aggregate(total=Sum('cantidad'))['total'] or 0
+    consulta_realizada = any([nombre, categoria_id, proveedor_id, estado])
+    # Exportar a PDF si se solicita
+    if exportar:
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        title = Paragraph("Reporte de Inventario Completo", styles['Heading1'])
+        elements.append(title)
+        data = [['Nombre', 'SKU', 'Categoría', 'Proveedor', 'Stock', 'Estado']]
+        for prod in productos:
+            data.append([
+                prod.nombre,
+                prod.sku,
+                prod.categoria.nombre if prod.categoria else '-',
+                prod.proveedor.nombre if prod.proveedor else '-',
+                str(prod.cantidad),
+                'Activo' if prod.estado else 'Inactivo'
+            ])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename="inventario_completo.pdf")
+    # Datos para filtros en template
+    categorias = Categoria.objects.all()
+    proveedores = Proveedor.objects.all()
+    return render(request, 'account/inventario_completo.html', {
+        'productos': productos,
+        'consulta_realizada': consulta_realizada,
+        'categorias': categorias,
+        'proveedores': proveedores,
+        'total_productos': total_productos,
+        'total_stock': total_stock,
+    })
+
+@login_required_custom
+@role_required(module='usuarios', action='leer')
+def reporte_usuarios(request):
+    nombre = request.GET.get("nombre", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    exportar = request.GET.get("exportar") == "1"
+    usuarios = Usuario.objects.all()
+    if nombre:
+        usuarios = usuarios.filter(username__icontains=nombre)
+    if estado:
+        usuarios = usuarios.filter(estado=(estado == "activo"))
+    total_usuarios = usuarios.count()
+    consulta_realizada = any([nombre, estado])
+    if exportar:
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        title = Paragraph("Reporte de Usuarios", styles['Heading1'])
+        elements.append(title)
+        data = [['Username', 'Nombres', 'Apellidos', 'Rol', 'Estado']]
+        for user in usuarios:
+            data.append([
+                user.username,
+                user.nombres or '-',
+                user.apellidos or '-',
+                user.rol.nombre if user.rol else '-',
+                'Activo' if user.estado else 'Inactivo'
+            ])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename="reporte_usuarios.pdf")
+    return render(request, 'account/reporte_usuarios.html', {
+        'usuarios': usuarios,
+        'consulta_realizada': consulta_realizada,
+        'total_usuarios': total_usuarios,
+    })
+
+@login_required_custom
+@role_required(module='proveedores', action='leer')
+def reporte_proveedores(request):
+    nombre = request.GET.get("nombre", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    exportar = request.GET.get("exportar") == "1"
+    proveedores = Proveedor.objects.all()
+    if nombre:
+        proveedores = proveedores.filter(nombre__icontains=nombre)
+    if estado:
+        proveedores = proveedores.filter(estado=(estado == "activo"))
+    total_proveedores = proveedores.count()
+    consulta_realizada = any([nombre, estado])
+    if exportar:
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        title = Paragraph("Reporte de Proveedores", styles['Heading1'])
+        elements.append(title)
+        data = [['Nombre', 'Contacto', 'Teléfono', 'Email', 'Estado']]
+        for prov in proveedores:
+            data.append([
+                prov.nombre,
+                prov.contacto or '-',
+                prov.telefono or '-',
+                prov.email or '-',
+                'Activo' if prov.estado else 'Inactivo'
+            ])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename="reporte_proveedores.pdf")
+    return render(request, 'account/reporte_proveedores.html', {
+        'proveedores': proveedores,
+        'consulta_realizada': consulta_realizada,
+        'total_proveedores': total_proveedores,
+    })
+
+@login_required_custom
+@role_required(module='almacenes', action='leer')
+def reporte_almacenes(request):
+    nombre = request.GET.get("nombre", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    exportar = request.GET.get("exportar") == "1"
+    almacenes = Almacen.objects.select_related('responsable').all()
+    if nombre:
+        almacenes = almacenes.filter(nombre__icontains=nombre)
+    if estado:
+        almacenes = almacenes.filter(estado=(estado == "activo"))
+    total_almacenes = almacenes.count()
+    consulta_realizada = any([nombre, estado])
+    if exportar:
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        title = Paragraph("Reporte de Almacenes", styles['Heading1'])
+        elements.append(title)
+        data = [['Nombre', 'Número', 'Ubicación', 'Responsable', 'Estado']]
+        for alm in almacenes:
+            data.append([
+                alm.nombre,
+                alm.numero or '-',
+                alm.ubicacion or '-',
+                alm.responsable.username if alm.responsable else '-',
+                'Activo' if alm.estado else 'Inactivo'
+            ])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename="reporte_almacenes.pdf")
+    return render(request, 'account/reporte_almacenes.html', {
+        'almacenes': almacenes,
+        'consulta_realizada': consulta_realizada,
+        'total_almacenes': total_almacenes,
+    })
+
+@login_required_custom
+@role_required(module='categorias', action='leer')
+def reporte_categorias(request):
+    nombre = request.GET.get("nombre", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    exportar = request.GET.get("exportar") == "1"
+    categorias = Categoria.objects.all()
+    if nombre:
+        categorias = categorias.filter(nombre__icontains=nombre)
+    if estado:
+        categorias = categorias.filter(estado=(estado == "activo"))
+    total_categorias = categorias.count()
+    consulta_realizada = any([nombre, estado])
+    if exportar:
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        title = Paragraph("Reporte de Categorías", styles['Heading1'])
+        elements.append(title)
+        data = [['Nombre', 'Descripción', 'Icono', 'Estado']]
+        for cat in categorias:
+            data.append([
+                cat.nombre,
+                cat.descripcion or '-',
+                cat.icono,
+                'Activo' if cat.estado else 'Inactivo'
+            ])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename="reporte_categorias.pdf")
+    return render(request, 'account/reporte_categorias.html', {
+        'categorias': categorias,
+        'consulta_realizada': consulta_realizada,
+        'total_categorias': total_categorias,
+    })
+
+@login_required_custom
+@role_required(module='roles', action='leer')
+def reporte_roles(request):
+    nombre = request.GET.get("nombre", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    exportar = request.GET.get("exportar") == "1"
+    roles = Rol.objects.all()
+    if nombre:
+        roles = roles.filter(nombre__icontains=nombre)
+    if estado:
+        roles = roles.filter(estado=(estado == "activo"))
+    total_roles = roles.count()
+    consulta_realizada = any([nombre, estado])
+    if exportar:
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        title = Paragraph("Reporte de Roles", styles['Heading1'])
+        elements.append(title)
+        data = [['Nombre', 'Descripción', 'Permisos', 'Estado']]
+        for rol in roles:
+            data.append([
+                rol.nombre,
+                rol.descripcion or '-',
+                rol.permisos,
+                'Activo' if rol.estado else 'Inactivo'
+            ])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename="reporte_roles.pdf")
+    return render(request, 'account/reporte_roles.html', {
+        'roles': roles,
+        'consulta_realizada': consulta_realizada,
+        'total_roles': total_roles,
     })
