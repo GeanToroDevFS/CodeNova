@@ -1,20 +1,80 @@
+/* productos.css - Estilos unificados para todas las páginas de productos */
+
+/* Estilos generales */
 body {
     font-family: 'Jost', sans-serif;
     background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos específicos para lista de productos */
+body.productos-lista {
+    margin: 0;
+    padding-top: 120px;
+    background: #f0f0f0;
+}
+
+/* Estilos para páginas de formulario centradas */
+body.form-centered {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    margin: 0;
     padding: 20px;
 }
 
+/* Estilos para la página de confirmación de eliminación */
+.confirmation-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 50px auto;
+    text-align: center;
+}
+
+.confirmation-box .buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-confirm {
+    background: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    font-size: 1rem;
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilos para formularios de productos */
 .card {
     background: white;
-    padding: 25px;
-    width: 360px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
 }
 
 .icono-titulo {
@@ -27,30 +87,12 @@ body {
 h2 {
     text-align: center;
     color: #333;
-    font-size: 1.3rem;
-    margin-bottom: 20px;
-}
-
-.alert {
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 14px;
-}
-
-.alert.success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.alert.error {
-    background-color: #f8d7da;
-    color: #721c24;
+    font-size: 1.5rem;
+    margin-bottom: 25px;
 }
 
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
@@ -72,7 +114,7 @@ h2 {
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 9px 12px;
+    padding: 10px 12px;
     font-size: 14px;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -82,12 +124,12 @@ h2 {
 
 .form-group textarea {
     resize: vertical;
-    min-height: 60px;
+    min-height: 80px;
 }
 
 .row {
     display: flex;
-    gap: 12px;
+    gap: 15px;
 }
 
 .row .form-group {
@@ -115,14 +157,14 @@ h2 {
 .botones {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
-    margin-top: 25px;
+    gap: 15px;
+    margin-top: 30px;
 }
 
 .botones button,
 .botones a {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border: none;
     border-radius: 6px;
     font-family: 'Jost', sans-serif;
@@ -132,6 +174,10 @@ h2 {
     text-align: center;
     text-decoration: none;
     transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .guardar {
@@ -142,14 +188,310 @@ h2 {
 .guardar:hover {
     background-color: #2980b9;
     transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .cancelar {
-    background-color: #e74c3c;
+    background-color: #6c757d;
     color: white;
 }
 
 .cancelar:hover {
-    background-color: #c0392b;
+    background-color: #5a6268;
     transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Alertas y mensajes */
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.alert.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.errorlist {
+    color: red;
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.errorlist li {
+    font-size: 0.9em;
+}
+
+.form-group .errorlist {
+    margin-top: -15px;
+}
+
+/* Estilos para la lista de productos */
+.topbar {
+    background: #007bff;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    z-index: 1000;
+    height: 60px;
+}
+
+.topbar .user-info {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.topbar .actions {
+    display: flex;
+    gap: 10px;
+    margin-right: 50px;
+}
+
+.topbar a {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+    color: white;
+}
+
+.topbar .home-btn {
+    background: #17a2b8;
+}
+
+.topbar .logout-btn {
+    background: #dc3545;
+}
+
+.topbar a:hover {
+    opacity: 0.9;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 30px auto;
+    font-family: 'Jost', sans-serif;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.title {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.messages li {
+    padding: 12px 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.products-table th,
+.products-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.products-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.products-table tr:hover {
+    background-color: #f5f8fa;
+}
+
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-active {
+    background-color: #e6f7ee;
+    color: #28a745;
+}
+
+.status-inactive {
+    background-color: #feecec;
+    color: #dc3545;
+}
+
+.stock-low {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.stock-critical {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.price {
+    font-weight: 600;
+    color: #28a745;
+}
+
+.action-links {
+    display: flex;
+    gap: 10px;
+}
+
+.action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.edit-link {
+    background-color: #e7f1ff;
+    color: #0056b3;
+}
+
+.edit-link:hover {
+    background-color: #d0e3ff;
+}
+
+.delete-link {
+    background-color: #fdecea;
+    color: #dc3545;
+}
+
+.delete-link:hover {
+    background-color: #fadbd8;
+}
+
+.no-products {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .products-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .topbar .actions {
+        margin-right: 10px;
+    }
+    
+    .confirmation-box .buttons {
+        flex-direction: column;
+    }
+    
+    .botones {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .botones button,
+    .botones a {
+        width: 100%;
+    }
+    
+    .row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    body.productos-lista {
+        padding-top: 140px;
+    }
 }
