@@ -8,6 +8,7 @@ from .views import (
     productos_listar, producto_crear, producto_editar, producto_eliminar,
     roles_listar, roles_crear, roles_editar, roles_eliminar, informes_listar, inventario_completo,
     reporte_usuarios, reporte_proveedores, reporte_almacenes, reporte_categorias, reporte_roles,
+    simple_login, health_check,
 )
 
 urlpatterns = [
@@ -59,5 +60,9 @@ urlpatterns = [
     path('informes/almacenes/', reporte_almacenes, name='reporte_almacenes'),
     path('informes/categorias/', reporte_categorias, name='reporte_categorias'),
     path('informes/roles/', reporte_roles, name='reporte_roles'),
+    
+    #Ruts pr logs
+    path('health/', health_check, name='health_check'),
+    path('debug-login/', simple_login, name='debug_login'),
     
 ]
