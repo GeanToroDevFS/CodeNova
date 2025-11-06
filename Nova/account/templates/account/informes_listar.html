@@ -1,76 +1,66 @@
-// {% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Informes - Nova</title>
-    <link rel="stylesheet" href="{% static 'account/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'account/css/reportes_base.css' %}">
+    <link rel="stylesheet" href="{% static 'account/css/reportes_listar.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-4">
-        <h1 class="text-center mb-4">{{ titulo }}</h1>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Inventario Completo</h5>
-                        <p class="card-text">Genera reportes de productos con filtros por nombre, categoría, proveedor y estado. Incluye exportación a PDF.</p>
-                        <a href="{% url 'inventario_completo' %}" class="btn btn-primary">Ver Reporte</a>
-                    </div>
-                </div>
+    <div class="container">
+        <h1 class="text-center">{{ titulo }}</h1>
+        
+        <div class="reportes-grid">
+            <div class="reporte-card">
+                <i class="fas fa-boxes reporte-icon"></i>
+                <h3 class="reporte-title">Inventario Completo</h3>
+                <p class="reporte-description">Genera reportes de productos con filtros por nombre, categoría, proveedor y estado. Incluye exportación a PDF.</p>
+                <a href="{% url 'inventario_completo' %}" class="reporte-btn">Ver Reporte</a>
             </div>
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Reporte de Usuarios</h5>
-                        <p class="card-text">Genera reportes de usuarios con filtros por nombre y estado. Incluye exportación a PDF.</p>
-                        <a href="{% url 'reporte_usuarios' %}" class="btn btn-primary">Ver Reporte</a>
-                    </div>
-                </div>
+            
+            <div class="reporte-card">
+                <i class="fas fa-users reporte-icon"></i>
+                <h3 class="reporte-title">Reporte de Usuarios</h3>
+                <p class="reporte-description">Genera reportes de usuarios con filtros por nombre y estado. Incluye exportación a PDF.</p>
+                <a href="{% url 'reporte_usuarios' %}" class="reporte-btn">Ver Reporte</a>
             </div>
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Reporte de Proveedores</h5>
-                        <p class="card-text">Genera reportes de proveedores con filtros por nombre y estado. Incluye exportación a PDF.</p>
-                        <a href="{% url 'reporte_proveedores' %}" class="btn btn-primary">Ver Reporte</a>
-                    </div>
-                </div>
+            
+            <div class="reporte-card">
+                <i class="fas fa-truck reporte-icon"></i>
+                <h3 class="reporte-title">Reporte de Proveedores</h3>
+                <p class="reporte-description">Genera reportes de proveedores con filtros por nombre y estado. Incluye exportación a PDF.</p>
+                <a href="{% url 'reporte_proveedores' %}" class="reporte-btn">Ver Reporte</a>
             </div>
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Reporte de Almacenes</h5>
-                        <p class="card-text">Genera reportes de almacenes con filtros por nombre y estado. Incluye exportación a PDF.</p>
-                        <a href="{% url 'reporte_almacenes' %}" class="btn btn-primary">Ver Reporte</a>
-                    </div>
-                </div>
+            
+            <div class="reporte-card">
+                <i class="fas fa-warehouse reporte-icon"></i>
+                <h3 class="reporte-title">Reporte de Almacenes</h3>
+                <p class="reporte-description">Genera reportes de almacenes con filtros por nombre y estado. Incluye exportación a PDF.</p>
+                <a href="{% url 'reporte_almacenes' %}" class="reporte-btn">Ver Reporte</a>
             </div>
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Reporte de Categorías</h5>
-                        <p class="card-text">Genera reportes de categorías con filtros por nombre y estado. Incluye exportación a PDF.</p>
-                        <a href="{% url 'reporte_categorias' %}" class="btn btn-primary">Ver Reporte</a>
-                    </div>
-                </div>
+            
+            <div class="reporte-card">
+                <i class="fas fa-tags reporte-icon"></i>
+                <h3 class="reporte-title">Reporte de Categorías</h3>
+                <p class="reporte-description">Genera reportes de categorías con filtros por nombre y estado. Incluye exportación a PDF.</p>
+                <a href="{% url 'reporte_categorias' %}" class="reporte-btn">Ver Reporte</a>
             </div>
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Reporte de Roles</h5>
-                        <p class="card-text">Genera reportes de roles con filtros por nombre y estado. Incluye exportación a PDF.</p>
-                        <a href="{% url 'reporte_roles' %}" class="btn btn-primary">Ver Reporte</a>
-                    </div>
-                </div>
+            
+            <div class="reporte-card">
+                <i class="fas fa-user-shield reporte-icon"></i>
+                <h3 class="reporte-title">Reporte de Roles</h3>
+                <p class="reporte-description">Genera reportes de roles con filtros por nombre y estado. Incluye exportación a PDF.</p>
+                <a href="{% url 'reporte_roles' %}" class="reporte-btn">Ver Reporte</a>
             </div>
         </div>
+        
         <div class="text-center mt-4">
             <a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver al Dashboard</a>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </body>
 </html>
