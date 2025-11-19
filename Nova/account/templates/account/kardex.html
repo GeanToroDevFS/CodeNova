@@ -72,7 +72,7 @@
                     <td>{{ entry.cantidad }}</td>
                     <td>{{ entry.motivo }}</td>
                     <td>{{ entry.fecha|date:"d/m/Y H:i" }}</td>
-                    <td>{{ entry.usuario.username if entry.usuario else '-' }}</td>
+                    <td>{{ entry.usuario.username|default:"-" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
