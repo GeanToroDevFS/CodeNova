@@ -91,6 +91,42 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <h3>Movimientos de Kardex</h3>
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>                    
+                    <th>Tipo</th>
+                    <th>Stock Anterior</th>
+                    <th>Cantidad Movida</th>
+                    <th>Stock Actual</th>
+                    <th>Motivo</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                {% for movimiento in kardex_entries %}
+                {% if movimiento.producto in venta.detalleventa_set.values_list('producto', flat=True) and movimiento.fecha.date == venta.fecha.date %}
+                <tr>
+                    <td>{{ movimiento.producto.nombre }}</td>
+                    <td>{{ movimiento.tipo }}</td>
+                    <td>{{ movimiento.stock_anterior }}</td>
+                    <td>{{ movimiento.cantidad }}</td>
+                    <td>{{ movimiento.stock_actual }}</td>
+                    <td>{{ movimiento.motivo }}</td>
+                    <td>{{ movimiento.fecha|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="no-products">No hay movimientos</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         {% else %}
         <p>Selecciona fechas para generar el reporte.</p>
         {% endif %}
