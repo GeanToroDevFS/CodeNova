@@ -156,5 +156,19 @@
             {% endif %}
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/logs/')
+            .then(response => response.json())
+            .then(data => {
+                console.log('=== LOGS RECIENTES ===');
+                data.forEach(log => {
+                    console.log(`${log.fecha}: ${log.detalles}`);
+                });
+                console.log('=== FIN LOGS ===');
+            })
+            .catch(error => console.error('Error cargando logs:', error));
+        });
+    </script>
 </body>
 </html>

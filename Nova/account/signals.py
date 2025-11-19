@@ -28,7 +28,7 @@ def log_user_logout(sender, request, user, **kwargs):
     )
     logger.info(f'Usuario {user.username} cerró sesión')
 
-# Logs de acciones en modelos
+# Logs para Producto
 @receiver(post_save, sender=Producto)
 def log_producto_change(sender, instance, created, **kwargs):
     user = getattr(threading.current_thread(), 'user', None)
@@ -52,7 +52,7 @@ def log_producto_delete(sender, instance, **kwargs):
     )
     logger.info(f'Producto "{instance.nombre}" fue eliminado por {user.username if user else "usuario desconocido"}')
 
-# Repite para otros modelos
+# Logs para Venta
 @receiver(post_save, sender=Venta)
 def log_venta_change(sender, instance, created, **kwargs):
     accion = 'creó' if created else 'actualizó'
@@ -64,6 +64,18 @@ def log_venta_change(sender, instance, created, **kwargs):
     )
     logger.info(f'Venta ID {instance.id} fue {accion} por {instance.usuario.username}')
 
+@receiver(post_delete, sender=Venta)
+def log_venta_delete(sender, instance, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    Log.objects.create(
+        usuario=user,
+        modelo='Venta',
+        accion='eliminó',
+        detalles=f'Usuario {user.username if user else "desconocido"} eliminó venta ID {instance.id}'
+    )
+    logger.info(f'Venta ID {instance.id} fue eliminada por {user.username if user else "usuario desconocido"}')
+
+# Logs para Usuario
 @receiver(post_save, sender=Usuario)
 def log_usuario_change(sender, instance, created, **kwargs):
     user = getattr(threading.current_thread(), 'user', None)
@@ -76,4 +88,109 @@ def log_usuario_change(sender, instance, created, **kwargs):
     )
     logger.info(f'Usuario "{instance.username}" fue {accion} por {user.username if user else "usuario desconocido"}')
 
-# Agrega más receivers para Rol, Almacen, Proveedor, Categoria si es necesario
+@receiver(post_delete, sender=Usuario)
+def log_usuario_delete(sender, instance, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    Log.objects.create(
+        usuario=user,
+        modelo='Usuario',
+        accion='eliminó',
+        detalles=f'Usuario {user.username if user else "desconocido"} eliminó usuario "{instance.username}" (ID: {instance.id})'
+    )
+    logger.info(f'Usuario "{instance.username}" fue eliminado por {user.username if user else "usuario desconocido"}')
+
+# Logs para Rol
+@receiver(post_save, sender=Rol)
+def log_rol_change(sender, instance, created, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    accion = 'creó' if created else 'actualizó'
+    Log.objects.create(
+        usuario=user,
+        modelo='Rol',
+        accion=accion,
+        detalles=f'Usuario {user.username if user else "desconocido"} {accion} rol "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Rol "{instance.nombre}" fue {accion} por {user.username if user else "usuario desconocido"}')
+
+@receiver(post_delete, sender=Rol)
+def log_rol_delete(sender, instance, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    Log.objects.create(
+        usuario=user,
+        modelo='Rol',
+        accion='eliminó',
+        detalles=f'Usuario {user.username if user else "desconocido"} eliminó rol "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Rol "{instance.nombre}" fue eliminado por {user.username if user else "usuario desconocido"}')
+
+# Logs para Almacen
+@receiver(post_save, sender=Almacen)
+def log_almacen_change(sender, instance, created, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    accion = 'creó' if created else 'actualizó'
+    Log.objects.create(
+        usuario=user,
+        modelo='Almacén',
+        accion=accion,
+        detalles=f'Usuario {user.username if user else "desconocido"} {accion} almacén "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Almacén "{instance.nombre}" fue {accion} por {user.username if user else "usuario desconocido"}')
+
+@receiver(post_delete, sender=Almacen)
+def log_almacen_delete(sender, instance, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    Log.objects.create(
+        usuario=user,
+        modelo='Almacén',
+        accion='eliminó',
+        detalles=f'Usuario {user.username if user else "desconocido"} eliminó almacén "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Almacén "{instance.nombre}" fue eliminado por {user.username if user else "usuario desconocido"}')
+
+# Logs para Proveedor
+@receiver(post_save, sender=Proveedor)
+def log_proveedor_change(sender, instance, created, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    accion = 'creó' if created else 'actualizó'
+    Log.objects.create(
+        usuario=user,
+        modelo='Proveedor',
+        accion=accion,
+        detalles=f'Usuario {user.username if user else "desconocido"} {accion} proveedor "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Proveedor "{instance.nombre}" fue {accion} por {user.username if user else "usuario desconocido"}')
+
+@receiver(post_delete, sender=Proveedor)
+def log_proveedor_delete(sender, instance, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    Log.objects.create(
+        usuario=user,
+        modelo='Proveedor',
+        accion='eliminó',
+        detalles=f'Usuario {user.username if user else "desconocido"} eliminó proveedor "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Proveedor "{instance.nombre}" fue eliminado por {user.username if user else "usuario desconocido"}')
+
+# Logs para Categoria
+@receiver(post_save, sender=Categoria)
+def log_categoria_change(sender, instance, created, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    accion = 'creó' if created else 'actualizó'
+    Log.objects.create(
+        usuario=user,
+        modelo='Categoría',
+        accion=accion,
+        detalles=f'Usuario {user.username if user else "desconocido"} {accion} categoría "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Categoría "{instance.nombre}" fue {accion} por {user.username if user else "usuario desconocido"}')
+
+@receiver(post_delete, sender=Categoria)
+def log_categoria_delete(sender, instance, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
+    Log.objects.create(
+        usuario=user,
+        modelo='Categoría',
+        accion='eliminó',
+        detalles=f'Usuario {user.username if user else "desconocido"} eliminó categoría "{instance.nombre}" (ID: {instance.id})'
+    )
+    logger.info(f'Categoría "{instance.nombre}" fue eliminada por {user.username if user else "usuario desconocido"}')
