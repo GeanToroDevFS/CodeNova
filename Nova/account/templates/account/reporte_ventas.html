@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="reporte-ventas">
-    <!-- 🔹 Franja superior -->
     <div class="topbar">
         <div class="user-info">👤 {{ user.username }}</div>
         <div class="actions">
@@ -19,7 +18,6 @@
         </div>
     </div>
 
-    <!-- 🔹 Contenido -->
     <div class="container">
         <div class="header">
             <h1 class="title">Reporte de Ventas</h1>
@@ -76,11 +74,11 @@
                     <td>
                         <ul style="list-style: none; padding: 0; margin: 0;">
                             {% for detalle in venta.detalleventa_set.all %}
-                            <li>{{ detalle.producto.nombre }} (Cant: {{ detalle.cantidad }}, Precio: ${{ detalle.precio_unitario }})</li>
+                            <li>{{ detalle.producto.nombre }} (Cant: {{ detalle.cantidad }}, Precio: ${{ detalle.producto.precio_unitario }} {{ detalle.producto.moneda }})</li>
                             {% endfor %}
                         </ul>
                     </td>
-                    <td>${{ venta.total }}</td>
+                    <td>${{ venta.total }} COP</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -97,7 +95,7 @@
         <table class="products-table">
             <thead>
                 <tr>
-                    <th>Producto</th>                    
+                    <th>Producto</th>
                     <th>Tipo</th>
                     <th>Stock Anterior</th>
                     <th>Cantidad Movida</th>

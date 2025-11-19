@@ -988,18 +988,25 @@ def venta_crear(request):
         for prod_id, cant in zip(productos_ids, cantidades):
             try:
                 prod = Producto.objects.get(id=prod_id)
-                stock_anterior = prod.cantidad  # Definir stock_anterior aquí
+                stock_anterior = prod.cantidad
                 if prod.reducir_stock(cant):
-                    DetalleVenta.objects.create(venta=venta, producto=prod, cantidad=cant, precio_unitario=prod.precio_unitario)
-                    Kardex.objects.create(producto=prod, tipo='salida', cantidad=cant, stock_anterior=stock_anterior, motivo='venta', usuario=request.user)
-                    total += prod.precio_unitario * cant
+                    precio_en_cop = prod.precio_en_cop()  # Nuevo: precio convertido a COP
+                    DetalleVenta.objects.create(venta=venta, producto=prod, cantidad=cant, precio_unitario=precio_en_cop)
+                    Kardex.objects.create(
+                        producto=prod, 
+                        tipo='salida', 
+                        cantidad=cant,  # Positivo
+                        stock_anterior=stock_anterior, 
+                        motivo='venta', 
+                        usuario=request.user
+                    )
+                    total += precio_en_cop * cant  # Suma en COP
                 else:
                     messages.error(request, f'Stock insuficiente para {prod.nombre}.')
                     return redirect('venta_crear')
             except Producto.DoesNotExist:
                 messages.error(request, 'Producto no encontrado.')
                 return redirect('venta_crear')
-        
         venta.total = total
         venta.save()
         messages.success(request, 'Venta realizada exitosamente.')
@@ -1097,7 +1104,6 @@ def reporte_ventas(request):
                 ('FONTSIZE', (0, 0), (-1, -1), 8),
             ]))
             elements.append(table_mov)
-
         doc.build(elements)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename="reporte_ventas.pdf")

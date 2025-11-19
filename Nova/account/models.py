@@ -21,10 +21,6 @@ class Usuario(AbstractUser):
         return self.nombres if self.nombres else super().get_short_name()
 
     def save(self, *args, **kwargs):
-        """
-        Ajusta flags de superusuario/empleado solo si el rol es 'Administrador'.
-        Otros roles no modifican estos flags para evitar bloquear el login normal.
-        """
         try:
             if self.rol and isinstance(self.rol.nombre, str):
                 nombre = self.rol.nombre.strip().lower()
@@ -32,18 +28,16 @@ class Usuario(AbstractUser):
                     self.is_superuser = True
                     self.is_staff = True
                 else:
-                    # Resetear flags cuando no es administrador
                     self.is_superuser = False
                     self.is_staff = False
         except Exception:
-            pass  # Evita romper el guardado si el rol no existe
+            pass
         super().save(*args, **kwargs)
-
 
 class Rol(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField(blank=True, null=True)
-    permisos = models.TextField(blank=True, default='')  # TextField para strings custom (e.g., 'gestionar_usuarios, productos_leer')
+    permisos = models.TextField(blank=True, default='')
 
     estado = models.BooleanField(default=True)
     creado_en = models.DateTimeField(auto_now_add=True)
@@ -56,7 +50,6 @@ class Rol(models.Model):
         if not self.permisos:
             return []
         return [p.strip().lower() for p in self.permisos.split(',') if p.strip()]
-
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
@@ -71,7 +64,6 @@ class Categoria(models.Model):
         verbose_name = 'Categoría'
         verbose_name_plural = 'Categorías'
         ordering = ['nombre']
-
 
 class Proveedor(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
@@ -90,7 +82,6 @@ class Proveedor(models.Model):
         verbose_name_plural = 'Proveedores'
         ordering = ['nombre']
 
-
 class Almacen(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     numero = models.CharField(max_length=20, unique=True, blank=True, null=True)
@@ -107,7 +98,6 @@ class Almacen(models.Model):
         verbose_name_plural = 'Almacenes'
         ordering = ['nombre']
 
-
 class Producto(models.Model):
     UNIDAD_CHOICES = [
         ('kg', 'Kilogramo'),
@@ -116,8 +106,8 @@ class Producto(models.Model):
         ('unidad', 'Unidad'),
     ]
     MONEDA_CHOICES = [
-        ('USD', 'Dólar estadounidense'),
         ('COP', 'Peso colombiano'),
+        ('USD', 'Dólar estadounidense'),
         ('EUR', 'Euro'),
     ]
 
@@ -150,6 +140,15 @@ class Producto(models.Model):
             return True
         return False
 
+    def precio_en_cop(self):
+        """Convierte precio_unitario a COP usando tasas fijas."""
+        tasas = {
+            'COP': 1,      # 1 COP = 1 COP
+            'USD': 4000,   # 1 USD = 4000 COP (ejemplo fijo)
+            'EUR': 4500,   # 1 EUR = 4500 COP (ejemplo fijo)
+        }
+        return self.precio_unitario * tasas.get(self.moneda, 1)
+
 class Venta(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fecha = models.DateTimeField(auto_now_add=True)
@@ -169,7 +168,7 @@ class Kardex(models.Model):
     TIPO_CHOICES = [('entrada', 'Entrada'), ('salida', 'Salida')]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
-    cantidad = models.IntegerField()  # Siempre positiva (e.g., 5 para salida)
+    cantidad = models.IntegerField()
     stock_anterior = models.IntegerField(default=0)
     fecha = models.DateTimeField(auto_now_add=True)
     motivo = models.CharField(max_length=100)
@@ -178,7 +177,7 @@ class Kardex(models.Model):
     def stock_actual(self):
         if self.tipo == 'entrada':
             return self.stock_anterior + self.cantidad
-        else:  # salida
+        else:
             return self.stock_anterior - self.cantidad
 
     def __str__(self):
@@ -189,10 +188,7 @@ class Log(models.Model):
     modelo = models.CharField(max_length=100)
     accion = models.CharField(max_length=100)
     detalles = models.TextField()
-    fecha = models.DateTimeField(auto_now_add=True)  # Asegúrate de que este campo esté presente
+    fecha = models.DateTimeField(auto_now_add=True)
          
     def __str__(self):
         return f"{self.modelo} - {self.accion} por {self.usuario}"
-     
-
-
