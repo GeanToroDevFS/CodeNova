@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Venta</title>
+    <link rel="stylesheet" href="{% static 'account/css/venta_form.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- 🔹 Franja superior -->
+    <div class="topbar">
+        <div class="user-info">👤 {{ user.username }}</div>
+        <div class="actions">
+            <a href="{% url 'dashboard' %}" class="home-btn">🏠 Home</a>
+            <a href="{% url 'logout' %}" class="logout-btn">⏻ Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- 🔹 Contenido -->
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Nueva Venta</h1>
+        </div>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" class="form-container">
+            {% csrf_token %}
+            <div id="productos-container">
+                <!-- Fila inicial estática -->
+                <div class="row mb-2 producto-row">
+                    <div class="col-md-6">
+                        <select name="productos[0]" class="form-control" required>
+                            <option value="">Seleccionar Producto</option>
+                            {% for prod in productos %}
+                            <option value="{{ prod.id }}">{{ prod.nombre }} (Stock: {{ prod.cantidad }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="number" name="cantidades[0]" class="form-control" placeholder="Cantidad" min="1" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger remove-row">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="add-producto" class="btn btn-secondary mb-3">
+                <i class="fas fa-plus"></i> Agregar Producto
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Crear Venta
+            </button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let container = document.getElementById('productos-container');
+        let addBtn = document.getElementById('add-producto');
+        let rowIndex = 1;
+
+        function addProductoRow() {
+            let row = document.createElement('div');
+            row.className = 'row mb-2 producto-row';
+            row.innerHTML = `
+                <div class="col-md-6">
+                    <select name="productos[${rowIndex}]" class="form-control" required>
+                        <option value="">Seleccionar Producto</option>
+                        {% for prod in productos %}
+                        <option value="{{ prod.id }}">{{ prod.nombre }} (Stock: {{ prod.cantidad }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="number" name="cantidades[${rowIndex}]" class="form-control" placeholder="Cantidad" min="1" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-row">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+            rowIndex++;
+        }
+
+        addBtn.addEventListener('click', addProductoRow);
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-row')) {
+                e.target.closest('.producto-row').remove();
+            }
+        });
+    </script>
+</body>
+</html>

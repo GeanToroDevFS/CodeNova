@@ -135,3 +135,26 @@ AUTHENTICATION_BACKENDS = [
     'account.backends.CustomAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.log',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],  # Usa ambos: archivo y consola
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

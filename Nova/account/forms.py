@@ -187,3 +187,9 @@ class RolForm(forms.ModelForm):
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'permisos': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'crear_producto, editar_producto'}),
         }
+
+class VentaForm(forms.Form):
+    productos = forms.ModelMultipleChoiceField(queryset=Producto.objects.filter(estado=True), widget=forms.CheckboxSelectMultiple)
+    cantidades = forms.CharField(widget=forms.HiddenInput)  # Manejar dinámicamente en template
+class KardexForm(forms.Form):
+    producto = forms.ModelChoiceField(queryset=Producto.objects.all(), required=False)
