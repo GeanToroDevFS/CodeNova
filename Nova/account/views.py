@@ -1084,7 +1084,7 @@ def reporte_ventas(request):
             movimientos = movimientos_por_venta.get(v.id, [])
             for m in movimientos:
                 data_mov.append([
-                    m.producto.nombre, m.tipo, str(m.stock_anterior), str(m.cantidad), str(m.stock_actual), m.motivo, m.fecha.strftime('%Y-%m-%d %H:%M')
+                    m.producto.nombre, m.tipo, str(m.stock_anterior), str(m.cantidad), str(m.stock_actual()), m.motivo, m.fecha.strftime('%Y-%m-%d %H:%M')
                 ])
         if data_mov:
             table_mov = Table(data_mov)
