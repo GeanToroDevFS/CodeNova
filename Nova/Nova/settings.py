@@ -88,9 +88,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internacionalización
 LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+# Zona horaria
+TIME_ZONE = 'America/Bogota'  # UTC-5 para Colombia
 USE_I18N = True
-USE_TZ = True
+USE_TZ = True # Mantén True para manejar zonas horarias correctamente
 
 # Archivos estáticos - CONFIGURACIÓN ACTUALIZADA
 STATIC_URL = '/static/'
