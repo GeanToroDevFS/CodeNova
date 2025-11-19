@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body class="venta-form">
     <!-- 🔹 Franja superior -->
     <div class="topbar">
         <div class="user-info">👤 {{ user.username }}</div>
@@ -32,12 +32,13 @@
             </ul>
         {% endif %}
 
-        <form method="post" class="form-container">
+        <form method="post" class="card">
             {% csrf_token %}
             <div id="productos-container">
                 <!-- Fila inicial estática -->
-                <div class="row mb-2 producto-row">
+                <div class="form-group row producto-row">
                     <div class="col-md-6">
+                        <label for="producto-0">Producto</label>
                         <select name="productos[0]" class="form-control" required>
                             <option value="">Seleccionar Producto</option>
                             {% for prod in productos %}
@@ -46,21 +47,25 @@
                         </select>
                     </div>
                     <div class="col-md-4">
+                        <label for="cantidad-0">Cantidad</label>
                         <input type="number" name="cantidades[0]" class="form-control" placeholder="Cantidad" min="1" required>
                     </div>
                     <div class="col-md-2">
+                        <label>&nbsp;</label>
                         <button type="button" class="btn btn-danger remove-row">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </div>
                 </div>
             </div>
-            <button type="button" id="add-producto" class="btn btn-secondary mb-3">
-                <i class="fas fa-plus"></i> Agregar Producto
-            </button>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Crear Venta
-            </button>
+            <div class="botones">
+                <button type="button" id="add-producto" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i> Agregar Producto
+                </button>
+                <button type="submit" class="btn btn-primary guardar">
+                    <i class="fas fa-save"></i> Crear Venta
+                </button>
+            </div>
         </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -71,9 +76,10 @@
 
         function addProductoRow() {
             let row = document.createElement('div');
-            row.className = 'row mb-2 producto-row';
+            row.className = 'form-group row producto-row';
             row.innerHTML = `
                 <div class="col-md-6">
+                    <label for="producto-${rowIndex}">Producto</label>
                     <select name="productos[${rowIndex}]" class="form-control" required>
                         <option value="">Seleccionar Producto</option>
                         {% for prod in productos %}
@@ -82,9 +88,11 @@
                     </select>
                 </div>
                 <div class="col-md-4">
+                    <label for="cantidad-${rowIndex}">Cantidad</label>
                     <input type="number" name="cantidades[${rowIndex}]" class="form-control" placeholder="Cantidad" min="1" required>
                 </div>
                 <div class="col-md-2">
+                    <label>&nbsp;</label>
                     <button type="button" class="btn btn-danger remove-row">
                         <i class="fas fa-trash"></i> Eliminar
                     </button>
