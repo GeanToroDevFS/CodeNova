@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django import forms
-from .models import Usuario, Rol, Categoria, Proveedor, Almacen, Producto
+from .models import Usuario, Rol, Categoria, Proveedor, Almacen, Producto, Venta, DetalleVenta, Kardex, Log 
 
 class RolAdminForm(forms.ModelForm):
     class Meta:
@@ -66,3 +66,20 @@ class ProductoAdmin(admin.ModelAdmin):
     search_fields = ['nombre', 'sku', 'descripcion']
     raw_id_fields = ['categoria', 'proveedor', 'almacen']
     readonly_fields = ['fecha_creacion', 'fecha_modificacion']
+
+
+@admin.register(Venta)
+class VentaAdmin(admin.ModelAdmin):
+    list_display = ['id', 'usuario', 'fecha', 'total']
+
+@admin.register(DetalleVenta)
+class DetalleVentaAdmin(admin.ModelAdmin):
+    list_display = ['venta', 'producto', 'cantidad', 'precio_unitario']
+
+@admin.register(Kardex)
+class KardexAdmin(admin.ModelAdmin):
+    list_display = ['producto', 'tipo', 'cantidad', 'fecha', 'motivo']
+
+@admin.register(Log)
+class LogAdmin(admin.ModelAdmin):
+    list_display = ['usuario', 'modelo', 'accion', 'fecha']

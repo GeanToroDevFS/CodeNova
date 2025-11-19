@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Ventas</title>
+    <link rel="stylesheet" href="{% static 'account/css/ventas_listar.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- 🔹 Franja superior -->
+    <div class="topbar">
+        <div class="user-info">👤 {{ user.username }}</div>
+        <div class="actions">
+            <a href="{% url 'dashboard' %}" class="home-btn">🏠 Home</a>
+            <a href="{% url 'logout' %}" class="logout-btn">⏻ Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- 🔹 Contenido -->
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Gestión de Ventas</h1>
+            {% if permisos.crear %}
+                <a href="{% url 'venta_crear' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nueva Venta
+                </a>
+            {% endif %}
+        </div>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                    <th>Productos</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td>
+                        <i class="fas fa-receipt category-icon"></i>
+                        {{ venta.id }}
+                    </td>
+                    <td>{{ venta.usuario.username }}</td>
+                    <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            {% for detalle in venta.detalleventa_set.all %}                            
+                            <li>{{ detalle.producto.nombre }} (Cant: {{ detalle.cantidad }}, Precio: ${{ detalle.precio_unitario }})</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>${{ venta.total }}</td>
+                </tr>                
+                {% empty %}                
+                <tr>
+                    <td colspan="5" class="no-products">
+                        <i class="fas fa-receipt" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                        No hay ventas registradas
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

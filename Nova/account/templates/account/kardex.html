@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tarjeta Kardex</title>
+    <link rel="stylesheet" href="{% static 'account/css/kardex.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- 🔹 Franja superior -->
+    <div class="topbar">
+        <div class="user-info">👤 {{ user.username }}</div>
+        <div class="actions">
+            <a href="{% url 'dashboard' %}" class="home-btn">🏠 Home</a>
+            <a href="{% url 'logout' %}" class="logout-btn">⏻ Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- 🔹 Contenido -->
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Tarjeta Kardex</h1>
+        </div>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="get" class="filter-form">
+            <div class="row">
+                <div class="col-md-4">
+                    <select name="producto" class="form-control">
+                        <option value="">Todos los Productos</option>
+                        {% for prod in productos %}
+                        <option value="{{ prod.id }}" {% if request.GET.producto == prod.id|stringformat:"s" %}selected{% endif %}>{{ prod.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Motivo</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in kardex_entries %}
+                <tr>
+                    <td>
+                        <i class="fas fa-box category-icon"></i>
+                        {{ entry.producto.nombre }}
+                    </td>
+                    <td>{{ entry.tipo }}</td>
+                    <td>{{ entry.cantidad }}</td>
+                    <td>{{ entry.motivo }}</td>
+                    <td>{{ entry.fecha|date:"d/m/Y H:i" }}</td>
+                    <td>{{ entry.usuario.username if entry.usuario else '-' }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="no-products">
+                        <i class="fas fa-box" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                        No hay movimientos en Kardex
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Ventas</title>
+    <link rel="stylesheet" href="{% static 'account/css/reporte_ventas.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- 🔹 Franja superior -->
+    <div class="topbar">
+        <div class="user-info">👤 {{ user.username }}</div>
+        <div class="actions">
+            <a href="{% url 'dashboard' %}" class="home-btn">🏠 Home</a>
+            <a href="{% url 'logout' %}" class="logout-btn">⏻ Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- 🔹 Contenido -->
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Reporte de Ventas</h1>
+        </div>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="get" class="filter-form">
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="date" name="fecha_inicio" class="form-control" value="{{ request.GET.fecha_inicio }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="fecha_fin" class="form-control" value="{{ request.GET.fecha_fin }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" name="exportar" value="1" class="btn btn-success">
+                        <i class="fas fa-download"></i> Exportar PDF
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% if consulta_realizada %}
+        <p>Total de ventas: {{ total_ventas }}</p>
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Productos</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td>
+                        <i class="fas fa-calendar category-icon"></i>
+                        {{ venta.fecha|date:"d/m/Y H:i" }}
+                    </td>
+                    <td>{{ venta.usuario.username }}</td>
+                    <td>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            {% for detalle in venta.detalleventa_set.all %}
+                            <li>{{ detalle.producto.nombre }} (Cant: {{ detalle.cantidad }}, Precio: ${{ detalle.precio_unitario }})</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>${{ venta.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="no-products">
+                        <i class="fas fa-calendar" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                        No hay ventas en el rango seleccionado
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Selecciona fechas para generar el reporte.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

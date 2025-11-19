@@ -6,7 +6,7 @@ from .forms import (
     LoginForm, CustomUserCreationForm, CustomUserChangeForm,
     AlmacenForm, ProveedorForm, CategoriaForm, ProductoForm, RolForm
 )
-from .models import Usuario, Almacen, Proveedor, Categoria, Producto, Rol
+from .models import Usuario, Almacen, Proveedor, Categoria, Producto, Rol, Venta, DetalleVenta, Kardex, Log
 from .decorators import login_required_custom, role_required, _user_has_permission
 from account.models import Usuario
 
@@ -23,7 +23,7 @@ from django.http import FileResponse
 
 def _get_dashboard_modules():
     """Módulos visibles en el dashboard usados en la matriz de permisos."""
-    return ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles']
+    return ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles', 'ventas']
 
 
 def _get_crud_actions():
@@ -100,7 +100,7 @@ def user_logout(request):
 @login_required_custom
 def dashboard(request):
     # Calcular módulos permitidos basados en permisos de "leer"
-    modulos = ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles']
+    modulos = _get_dashboard_modules() # ← Cambia esto para incluir 'ventas'
     modulos_permitidos = [modulo for modulo in modulos if _user_has_permission(request.user, modulo, 'leer')]
     
     return render(request, 'account/dashboard.html', {
@@ -947,4 +947,120 @@ def reporte_roles(request):
         'roles': roles,
         'consulta_realizada': consulta_realizada,
         'total_roles': total_roles,
+    })
+    
+# ====================================================
+# --- Funciones para Reportes --- lógica para ventas, Kardex y reporte.
+# ====================================================
+
+@login_required_custom
+@role_required(module='ventas', action='leer')
+def ventas_listar(request):
+    ventas = Venta.objects.select_related('usuario').prefetch_related('detalleventa_set__producto').all().order_by('-fecha')  # Agrega prefetch para detalles
+    permisos = {
+        'leer': _user_has_permission(request.user, 'ventas', 'leer'),
+        'crear': _user_has_permission(request.user, 'ventas', 'crear'),
+    }
+    return render(request, 'account/ventas_listar.html', {
+        'ventas': ventas,
+        'titulo': 'Lista de Ventas',
+        'permisos': permisos,
+    })
+
+@login_required_custom
+@role_required(module='ventas', action='crear')
+def venta_crear(request):
+    if request.method == 'POST':
+        productos_ids = []
+        cantidades = []
+        for key, value in request.POST.items():
+            if key.startswith('productos[') and value:
+                productos_ids.append(value)
+            elif key.startswith('cantidades[') and value:
+                cantidades.append(int(value))
+        
+        if not productos_ids or not cantidades or len(productos_ids) != len(cantidades):
+            messages.error(request, 'Debe agregar al menos un producto con cantidad válida.')
+            return redirect('venta_crear')
+        
+        venta = Venta.objects.create(usuario=request.user, total=0)
+        total = 0
+        for prod_id, cant in zip(productos_ids, cantidades):
+            try:
+                prod = Producto.objects.get(id=prod_id)
+                if prod.reducir_stock(cant):
+                    DetalleVenta.objects.create(venta=venta, producto=prod, cantidad=cant, precio_unitario=prod.precio_unitario)
+                    Kardex.objects.create(producto=prod, tipo='salida', cantidad=-cant, motivo='venta', usuario=request.user)
+                    total += prod.precio_unitario * cant
+                else:
+                    messages.error(request, f'Stock insuficiente para {prod.nombre}.')
+                    return redirect('venta_crear')
+            except Producto.DoesNotExist:
+                messages.error(request, 'Producto no encontrado.')
+                return redirect('venta_crear')
+        
+        venta.total = total
+        venta.save()
+        messages.success(request, 'Venta realizada exitosamente.')
+        return redirect('ventas_listar')
+    
+    productos = Producto.objects.filter(estado=True)
+    return render(request, 'account/venta_form.html', {'productos': productos, 'titulo': 'Nueva Venta'})
+
+
+@login_required_custom
+@role_required(module='productos', action='leer')  # Asumir permisos en productos
+def kardex(request):
+    producto_id = request.GET.get('producto')
+    kardex_entries = Kardex.objects.all()
+    if producto_id:
+        kardex_entries = kardex_entries.filter(producto_id=producto_id)
+    productos = Producto.objects.all()
+    return render(request, 'account/kardex.html', {
+        'kardex_entries': kardex_entries,
+        'productos': productos,
+    })
+
+@login_required_custom
+@role_required(module='ventas', action='leer')
+def reporte_ventas(request):
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+    exportar = request.GET.get('exportar') == '1'
+    ventas = Venta.objects.select_related('usuario').prefetch_related('detalleventa_set__producto').all()  # Agrega prefetch para detalles
+    if fecha_inicio:
+        ventas = ventas.filter(fecha__gte=fecha_inicio)
+    if fecha_fin:
+        ventas = ventas.filter(fecha__lte=fecha_fin)
+    total_ventas = ventas.count()
+    consulta_realizada = any([fecha_inicio, fecha_fin])
+    if exportar:
+        # Copiar lógica de PDF de inventario_completo, adaptada a ventas
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        title = Paragraph("Reporte de Ventas", styles['Heading1'])
+        elements.append(title)
+        data = [['Fecha', 'Usuario', 'Productos', 'Total']]  # Agrega columna "Productos"
+        for v in ventas:
+            productos_str = ', '.join([f"{d.producto.nombre} (Cant: {d.cantidad})" for d in v.detalleventa_set.all()])  # Concatena productos
+            data.append([v.fecha.strftime('%Y-%m-%d'), v.usuario.username, productos_str, str(v.total)])
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename="reporte_ventas.pdf")
+    return render(request, 'account/reporte_ventas.html', {
+        'ventas': ventas,
+        'consulta_realizada': consulta_realizada,
+        'total_ventas': total_ventas,
     })

@@ -8,6 +8,7 @@ from .views import (
     productos_listar, producto_crear, producto_editar, producto_eliminar,
     roles_listar, roles_crear, roles_editar, roles_eliminar, informes_listar, inventario_completo,
     reporte_usuarios, reporte_proveedores, reporte_almacenes, reporte_categorias, reporte_roles,
+    ventas_listar, venta_crear, kardex, reporte_ventas,
 )
 
 urlpatterns = [
@@ -59,4 +60,14 @@ urlpatterns = [
     path('informes/almacenes/', reporte_almacenes, name='reporte_almacenes'),
     path('informes/categorias/', reporte_categorias, name='reporte_categorias'),
     path('informes/roles/', reporte_roles, name='reporte_roles'),  
+    
+    # Ventas
+    path('ventas/', ventas_listar, name='ventas_listar'),
+    path('ventas/crear/', venta_crear, name='venta_crear'),
+    
+    # Kardex
+    path('kardex/', kardex, name='kardex'),
+    
+    # Informes adicionales
+    path('informes/ventas/', reporte_ventas, name='reporte_ventas'),
 ]
