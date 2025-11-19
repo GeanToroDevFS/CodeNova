@@ -169,21 +169,17 @@ class Kardex(models.Model):
     TIPO_CHOICES = [('entrada', 'Entrada'), ('salida', 'Salida')]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
-    cantidad = models.IntegerField()  # Cantidad movida (e.g., +10 entrada, -5 salida)
+    cantidad = models.IntegerField()  # Siempre positiva (e.g., 5 para salida)
+    stock_anterior = models.IntegerField(default=0)
     fecha = models.DateTimeField(auto_now_add=True)
-    motivo = models.CharField(max_length=100)  # e.g., 'venta', 'compra'
+    motivo = models.CharField(max_length=100)
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
-    
-    def stock_anterior(self):
-        # Calcula stock antes de este movimiento
-        movimientos_anteriores = Kardex.objects.filter(
-            producto=self.producto, fecha__lt=self.fecha
-        ).aggregate(total=models.Sum('cantidad'))['total'] or 0
-        return movimientos_anteriores
 
     def stock_actual(self):
-        # Calcula stock después de este movimiento
-        return self.stock_anterior() + self.cantidad
+        if self.tipo == 'entrada':
+            return self.stock_anterior + self.cantidad
+        else:  # salida
+            return self.stock_anterior - self.cantidad
 
     def __str__(self):
         return f"{self.tipo} - {self.producto.nombre} ({self.cantidad})"

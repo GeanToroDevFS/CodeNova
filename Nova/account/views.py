@@ -988,9 +988,10 @@ def venta_crear(request):
         for prod_id, cant in zip(productos_ids, cantidades):
             try:
                 prod = Producto.objects.get(id=prod_id)
+                stock_anterior = prod.cantidad  # Definir stock_anterior aquí
                 if prod.reducir_stock(cant):
                     DetalleVenta.objects.create(venta=venta, producto=prod, cantidad=cant, precio_unitario=prod.precio_unitario)
-                    Kardex.objects.create(producto=prod, tipo='salida', cantidad=-cant, motivo='venta', usuario=request.user)
+                    Kardex.objects.create(producto=prod, tipo='salida', cantidad=cant, stock_anterior=stock_anterior, motivo='venta', usuario=request.user)
                     total += prod.precio_unitario * cant
                 else:
                     messages.error(request, f'Stock insuficiente para {prod.nombre}.')
@@ -1034,22 +1035,30 @@ def reporte_ventas(request):
         ventas = ventas.filter(fecha__lte=fecha_fin)
     total_ventas = ventas.count()
     consulta_realizada = any([fecha_inicio, fecha_fin])
+    
+    # Obtener movimientos de Kardex relacionados con las ventas
+    kardex_entries = Kardex.objects.filter(
+        producto__in=ventas.values_list('detalleventa__producto', flat=True).distinct(),
+        fecha__date__in=ventas.values_list('fecha__date', flat=True).distinct()
+    ).order_by('fecha')
+    
     if exportar:
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         elements = []
         styles = getSampleStyleSheet()
+    
+        # Título
         title = Paragraph("Reporte de Ventas", styles['Heading1'])
         elements.append(title)
-        data = [['Fecha', 'Usuario', 'Productos', 'Total', 'Movimientos Kardex']]  # Nueva columna
+    
+        # Tabla de Ventas
+        data_ventas = [['Fecha', 'Usuario', 'Productos', 'Total']]
         for v in ventas:
-            productos_str = ', '.join([f"{d.producto.nombre} (Cant: {d.cantidad})" for d in v.detalleventa_set.all()])
-            # Obtén movimientos relacionados
-            movimientos = Kardex.objects.filter(producto__in=v.detalleventa_set.values('producto'), fecha__date=v.fecha.date())
-            movimientos_str = ', '.join([f"{m.producto.nombre}: Ant {m.stock_anterior} -> Mov {m.cantidad} -> Act {m.stock_actual}" for m in movimientos])
-            data.append([v.fecha.strftime('%Y-%m-%d'), v.usuario.username, productos_str, str(v.total), movimientos_str])
-        table = Table(data)
-        table.setStyle(TableStyle([
+            productos_str = ', '.join([f"{d.producto.nombre} (Cant: {d.cantidad}, Precio: ${d.precio_unitario})" for d in v.detalleventa_set.all()])
+            data_ventas.append([v.fecha.strftime('%Y-%m-%d'), v.usuario.username, productos_str, str(v.total)])
+        table_ventas = Table(data_ventas)
+        table_ventas.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -1057,12 +1066,41 @@ def reporte_ventas(request):
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ('FONTSIZE', (0, 0), (-1, -1), 8),
         ]))
-        elements.append(table)
+        elements.append(table_ventas)
+    
+        # Espacio
+        elements.append(Paragraph("<br/><br/>", styles['Normal']))
+    
+        # Título de Movimientos
+        title_mov = Paragraph("Movimientos de Kardex", styles['Heading2'])
+        elements.append(title_mov)
+    
+        # Tabla de Movimientos
+        data_mov = [['Producto', 'Tipo', 'Stock Anterior', 'Cantidad Movida', 'Stock Actual', 'Motivo', 'Fecha']]
+        for v in ventas:
+            movimientos = Kardex.objects.filter(producto__in=v.detalleventa_set.values('producto'), fecha__date=v.fecha.date())
+            for m in movimientos:
+                data_mov.append([
+                    m.producto.nombre, m.tipo, str(m.stock_anterior), str(m.cantidad), str(m.stock_actual), m.motivo, m.fecha.strftime('%Y-%m-%d %H:%M')
+                ])
+        if data_mov:
+            table_mov = Table(data_mov)
+            table_mov.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ]))
+            elements.append(table_mov)
+    
         doc.build(elements)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename="reporte_ventas.pdf")
     return render(request, 'account/reporte_ventas.html', {
         'ventas': ventas,
+        'kardex_entries': kardex_entries,  # Agregado
         'consulta_realizada': consulta_realizada,
         'total_ventas': total_ventas,
     })
