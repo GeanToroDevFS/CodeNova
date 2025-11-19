@@ -157,18 +157,30 @@
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        let lastLogCount = 0;  // Para evitar repetir logs
+
+        function loadLogs() {
             fetch('/api/logs/')
-            .then(response => response.json())
-            .then(data => {
-                console.log('=== LOGS RECIENTES ===');
-                data.forEach(log => {
-                    console.log(`${log.fecha}: ${log.detalles}`);
-                });
-                console.log('=== FIN LOGS ===');
-            })
-            .catch(error => console.error('Error cargando logs:', error));
-        });
-    </script>
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > lastLogCount) {
+                        console.log('=== NUEVOS LOGS EN TIEMPO REAL ===');
+                        data.slice(lastLogCount).forEach(log => {
+                            console.log(`${log.fecha}: ${log.detalles}`);
+                        });
+                        console.log('=== FIN LOGS ===');
+                        lastLogCount = data.length;
+                    }
+                })
+                .catch(error => console.error('Error cargando logs:', error));
+            }
+            
+            // Cargar inicial
+            document.addEventListener('DOMContentLoaded', loadLogs);
+            
+            // Polling cada 5 segundos
+            setInterval(loadLogs, 5000);
+        </script>
+        
 </body>
 </html>
