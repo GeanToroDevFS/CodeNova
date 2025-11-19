@@ -165,7 +165,12 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'account.signals': {  # Logger específico para signals
+        'account.signals': {  # Para signals.py
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'account.middleware': {  # NUEVO: Para middleware.py
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
