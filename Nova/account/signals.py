@@ -31,24 +31,26 @@ def log_user_logout(sender, request, user, **kwargs):
 # Logs de acciones en modelos
 @receiver(post_save, sender=Producto)
 def log_producto_change(sender, instance, created, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
     accion = 'creó' if created else 'actualizó'
     Log.objects.create(
-        user = getattr(threading.current_thread(), 'user', None),  # Asumir None; usa request.user si tienes middleware
+        usuario=user,
         modelo='Producto',
         accion=accion,
-        detalles=f'Usuario actualizó producto "{instance.nombre}" (ID: {instance.id}) - Acción: {accion}'
+        detalles=f'Usuario {user.username if user else "desconocido"} {accion} producto "{instance.nombre}" (ID: {instance.id})'
     )
-    logger.info(f'Producto "{instance.nombre}" fue {accion} por usuario desconocido')
+    logger.info(f'Producto "{instance.nombre}" fue {accion} por {user.username if user else "usuario desconocido"}')
 
 @receiver(post_delete, sender=Producto)
 def log_producto_delete(sender, instance, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
     Log.objects.create(
-        usuario=None,
+        usuario=user,
         modelo='Producto',
         accion='eliminó',
-        detalles=f'Producto "{instance.nombre}" (ID: {instance.id}) fue eliminado'
+        detalles=f'Usuario {user.username if user else "desconocido"} eliminó producto "{instance.nombre}" (ID: {instance.id})'
     )
-    logger.info(f'Producto "{instance.nombre}" fue eliminado')
+    logger.info(f'Producto "{instance.nombre}" fue eliminado por {user.username if user else "usuario desconocido"}')
 
 # Repite para otros modelos
 @receiver(post_save, sender=Venta)
@@ -64,13 +66,14 @@ def log_venta_change(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Usuario)
 def log_usuario_change(sender, instance, created, **kwargs):
+    user = getattr(threading.current_thread(), 'user', None)
     accion = 'creó' if created else 'actualizó'
     Log.objects.create(
-        usuario=None,
+        usuario=user,
         modelo='Usuario',
         accion=accion,
-        detalles=f'Usuario "{instance.username}" (ID: {instance.id}) fue {accion}'
+        detalles=f'Usuario {user.username if user else "desconocido"} {accion} usuario "{instance.username}" (ID: {instance.id})'
     )
-    logger.info(f'Usuario "{instance.username}" fue {accion}')
+    logger.info(f'Usuario "{instance.username}" fue {accion} por {user.username if user else "usuario desconocido"}')
 
 # Agrega más receivers para Rol, Almacen, Proveedor, Categoria si es necesario
