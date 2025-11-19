@@ -1028,7 +1028,7 @@ def reporte_ventas(request):
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
     exportar = request.GET.get('exportar') == '1'
-    ventas = Venta.objects.select_related('usuario').prefetch_related('detalleventa_set__producto').all()  # Agrega prefetch para detalles
+    ventas = Venta.objects.select_related('usuario').prefetch_related('detalleventa_set__producto').all()
     if fecha_inicio:
         ventas = ventas.filter(fecha__gte=fecha_inicio)
     if fecha_fin:
@@ -1036,11 +1036,14 @@ def reporte_ventas(request):
     total_ventas = ventas.count()
     consulta_realizada = any([fecha_inicio, fecha_fin])
     
-    # Obtener movimientos de Kardex relacionados con las ventas
-    kardex_entries = Kardex.objects.filter(
-        producto__in=ventas.values_list('detalleventa__producto', flat=True).distinct(),
-        fecha__date__in=ventas.values_list('fecha__date', flat=True).distinct()
-    ).order_by('fecha')
+    # Crear diccionario de movimientos por venta
+    movimientos_por_venta = {}
+    for venta in ventas:
+        movimientos = Kardex.objects.filter(
+            producto__in=venta.detalleventa_set.values_list('producto', flat=True),
+            fecha__date=venta.fecha.date()
+        ).order_by('fecha')
+        movimientos_por_venta[venta.id] = movimientos
     
     if exportar:
         buffer = BytesIO()
@@ -1070,7 +1073,7 @@ def reporte_ventas(request):
     
         # Espacio
         elements.append(Paragraph("<br/><br/>", styles['Normal']))
-    
+        
         # Título de Movimientos
         title_mov = Paragraph("Movimientos de Kardex", styles['Heading2'])
         elements.append(title_mov)
@@ -1078,7 +1081,7 @@ def reporte_ventas(request):
         # Tabla de Movimientos
         data_mov = [['Producto', 'Tipo', 'Stock Anterior', 'Cantidad Movida', 'Stock Actual', 'Motivo', 'Fecha']]
         for v in ventas:
-            movimientos = Kardex.objects.filter(producto__in=v.detalleventa_set.values('producto'), fecha__date=v.fecha.date())
+            movimientos = movimientos_por_venta.get(v.id, [])
             for m in movimientos:
                 data_mov.append([
                     m.producto.nombre, m.tipo, str(m.stock_anterior), str(m.cantidad), str(m.stock_actual), m.motivo, m.fecha.strftime('%Y-%m-%d %H:%M')
@@ -1094,13 +1097,13 @@ def reporte_ventas(request):
                 ('FONTSIZE', (0, 0), (-1, -1), 8),
             ]))
             elements.append(table_mov)
-    
+
         doc.build(elements)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename="reporte_ventas.pdf")
     return render(request, 'account/reporte_ventas.html', {
         'ventas': ventas,
-        'kardex_entries': kardex_entries,  # Agregado
+        'movimientos_por_venta': movimientos_por_venta,
         'consulta_realizada': consulta_realizada,
         'total_ventas': total_ventas,
     })

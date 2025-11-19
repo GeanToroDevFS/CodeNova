@@ -107,8 +107,7 @@
             </thead>
             <tbody>
                 {% for venta in ventas %}
-                {% for movimiento in kardex_entries %}
-                {% if movimiento.producto in venta.detalleventa_set.values_list('producto', flat=True) and movimiento.fecha.date == venta.fecha.date %}
+                {% for movimiento in movimientos_por_venta|get_item:venta.id %}
                 <tr>
                     <td>{{ movimiento.producto.nombre }}</td>
                     <td>{{ movimiento.tipo }}</td>
@@ -118,7 +117,6 @@
                     <td>{{ movimiento.motivo }}</td>
                     <td>{{ movimiento.fecha|date:"d/m/Y H:i" }}</td>
                 </tr>
-                {% endif %}
                 {% endfor %}
                 {% empty %}
                 <tr>
