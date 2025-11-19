@@ -176,12 +176,13 @@ body.reporte-ventas {
 /* Más espacio entre columnas */
 .row {
     display: flex;
-    gap: 20px; /* Aumentado de 10px a 20px */
+    gap: 25px; /* Aumenta el espacio entre columnas */
     margin-bottom: 10px;
 }
 
 /* Para que el botón Filtrar no quede pegado */
 .filter-btn-wrapper {
+    min-width: 120px;
     display: flex;
     align-items: flex-end;
 }
