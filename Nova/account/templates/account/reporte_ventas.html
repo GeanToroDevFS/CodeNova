@@ -34,12 +34,14 @@
         <form method="get" class="filter-form">
             <div class="row">
                 <div class="col-md-3">
+                    <label class="date-label">Fecha de inicio</label>
                     <input type="date" name="fecha_inicio" class="form-control" value="{{ request.GET.fecha_inicio }}">
                 </div>
                 <div class="col-md-3">
+                    <label class="date-label">Fecha final</label>
                     <input type="date" name="fecha_fin" class="form-control" value="{{ request.GET.fecha_fin }}">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2 filter-btn-wrapper">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search"></i> Filtrar
                     </button>

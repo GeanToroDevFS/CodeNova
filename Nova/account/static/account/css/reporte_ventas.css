@@ -159,6 +159,13 @@ body.reporte-ventas {
     margin-bottom: 20px;
 }
 
+/* Label para las fechas */
+.date-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
 .form-control {
     width: 100%;
     padding: 10px;
@@ -166,10 +173,17 @@ body.reporte-ventas {
     border-radius: 5px;
 }
 
+/* Más espacio entre columnas */
 .row {
     display: flex;
-    gap: 10px;
+    gap: 20px; /* Aumentado de 10px a 20px */
     margin-bottom: 10px;
+}
+
+/* Para que el botón Filtrar no quede pegado */
+.filter-btn-wrapper {
+    display: flex;
+    align-items: flex-end;
 }
 
 .col-md-3, .col-md-2 {
