@@ -164,7 +164,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.length > lastLogCount) {
-                        console.log('=== NUEVOS LOGS EN TIEMPO REAL ===');
+                        console.log('=== LOGS EN TIEMPO REAL ===');
                         data.slice(lastLogCount).forEach(log => {
                             console.log(`${log.fecha}: ${log.detalles}`);
                         });
@@ -181,6 +181,6 @@
             // Polling cada 5 segundos
             setInterval(loadLogs, 5000);
         </script>
-        
+
 </body>
 </html>
