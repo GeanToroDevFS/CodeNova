@@ -151,6 +151,9 @@
             {% if 'ventas' in modulos_permitidos %}
                 <a href="{% url 'ventas_listar' %}">💰 Ventas</a>
             {% endif %}
+            {% if 'kardex' in modulos_permitidos %}
+                <a href="{% url 'kardex' %}">📈 Kardex</a>  <!-- Enlace completo para Kardex -->
+            {% endif %}
         </div>
     </div>
 </body>

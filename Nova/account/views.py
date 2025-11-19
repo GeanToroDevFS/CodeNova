@@ -23,7 +23,7 @@ from django.http import FileResponse
 
 def _get_dashboard_modules():
     """Módulos visibles en el dashboard usados en la matriz de permisos."""
-    return ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles', 'ventas']
+    return ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles', 'ventas', 'kardex']
 
 
 def _get_crud_actions():
