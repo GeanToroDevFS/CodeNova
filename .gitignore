@@ -1,5 +1,6 @@
 # Evita subir tu entorno virtual
 my_StockNova/
+staticfiles/
 
 # Archivos temporales de Python
 __pycache__/
