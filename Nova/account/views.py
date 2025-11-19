@@ -1012,7 +1012,7 @@ def venta_crear(request):
 @role_required(module='productos', action='leer')  # Asumir permisos en productos
 def kardex(request):
     producto_id = request.GET.get('producto')
-    kardex_entries = Kardex.objects.all()
+    kardex_entries = Kardex.objects.all().order_by('fecha')  # Ordenar por fecha
     if producto_id:
         kardex_entries = kardex_entries.filter(producto_id=producto_id)
     productos = Producto.objects.all()
@@ -1035,17 +1035,19 @@ def reporte_ventas(request):
     total_ventas = ventas.count()
     consulta_realizada = any([fecha_inicio, fecha_fin])
     if exportar:
-        # Copiar lógica de PDF de inventario_completo, adaptada a ventas
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         elements = []
         styles = getSampleStyleSheet()
         title = Paragraph("Reporte de Ventas", styles['Heading1'])
         elements.append(title)
-        data = [['Fecha', 'Usuario', 'Productos', 'Total']]  # Agrega columna "Productos"
+        data = [['Fecha', 'Usuario', 'Productos', 'Total', 'Movimientos Kardex']]  # Nueva columna
         for v in ventas:
-            productos_str = ', '.join([f"{d.producto.nombre} (Cant: {d.cantidad})" for d in v.detalleventa_set.all()])  # Concatena productos
-            data.append([v.fecha.strftime('%Y-%m-%d'), v.usuario.username, productos_str, str(v.total)])
+            productos_str = ', '.join([f"{d.producto.nombre} (Cant: {d.cantidad})" for d in v.detalleventa_set.all()])
+            # Obtén movimientos relacionados
+            movimientos = Kardex.objects.filter(producto__in=v.detalleventa_set.values('producto'), fecha__date=v.fecha.date())
+            movimientos_str = ', '.join([f"{m.producto.nombre}: Ant {m.stock_anterior} -> Mov {m.cantidad} -> Act {m.stock_actual}" for m in movimientos])
+            data.append([v.fecha.strftime('%Y-%m-%d'), v.usuario.username, productos_str, str(v.total), movimientos_str])
         table = Table(data)
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.skyblue),

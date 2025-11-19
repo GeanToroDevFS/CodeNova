@@ -55,7 +55,9 @@
                 <tr>
                     <th>Producto</th>
                     <th>Tipo</th>
-                    <th>Cantidad</th>
+                    <th>Stock Anterior</th>
+                    <th>Cantidad Movida</th>
+                    <th>Stock Actual</th>
                     <th>Motivo</th>
                     <th>Fecha</th>
                     <th>Usuario</th>
@@ -69,7 +71,9 @@
                         {{ entry.producto.nombre }}
                     </td>
                     <td>{{ entry.tipo }}</td>
+                    <td>{{ entry.stock_anterior }}</td>
                     <td>{{ entry.cantidad }}</td>
+                    <td>{{ entry.stock_actual }}</td>
                     <td>{{ entry.motivo }}</td>
                     <td>{{ entry.fecha|date:"d/m/Y H:i" }}</td>
                     <td>{{ entry.usuario.username|default:"-" }}</td>

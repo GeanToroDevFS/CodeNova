@@ -156,6 +156,7 @@ class Venta(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     def __str__(self):
         return f"Venta {self.id} - {self.usuario.username}"
+
 class DetalleVenta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
@@ -163,16 +164,30 @@ class DetalleVenta(models.Model):
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     def __str__(self):
         return f"{self.producto.nombre} x{self.cantidad}"
+
 class Kardex(models.Model):
     TIPO_CHOICES = [('entrada', 'Entrada'), ('salida', 'Salida')]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
-    cantidad = models.IntegerField()  # Positivo para entrada, negativo para salida
+    cantidad = models.IntegerField()  # Cantidad movida (e.g., +10 entrada, -5 salida)
     fecha = models.DateTimeField(auto_now_add=True)
     motivo = models.CharField(max_length=100)  # e.g., 'venta', 'compra'
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
+    
+    def stock_anterior(self):
+        # Calcula stock antes de este movimiento
+        movimientos_anteriores = Kardex.objects.filter(
+            producto=self.producto, fecha__lt=self.fecha
+        ).aggregate(total=models.Sum('cantidad'))['total'] or 0
+        return movimientos_anteriores
+
+    def stock_actual(self):
+        # Calcula stock después de este movimiento
+        return self.stock_anterior() + self.cantidad
+
     def __str__(self):
         return f"{self.tipo} - {self.producto.nombre} ({self.cantidad})"
+
 class Log(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
     modelo = models.CharField(max_length=100)
