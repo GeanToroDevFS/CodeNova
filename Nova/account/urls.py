@@ -8,7 +8,7 @@ from .views import (
     productos_listar, producto_crear, producto_editar, producto_eliminar,
     roles_listar, roles_crear, roles_editar, roles_eliminar, informes_listar, inventario_completo,
     reporte_usuarios, reporte_proveedores, reporte_almacenes, reporte_categorias, reporte_roles,
-    ventas_listar, venta_crear, kardex, reporte_ventas,
+    ventas_listar, venta_crear, kardex, reporte_ventas, logs_api,
 )
 
 urlpatterns = [
@@ -70,4 +70,7 @@ urlpatterns = [
     
     # Informes adicionales
     path('informes/ventas/', reporte_ventas, name='reporte_ventas'),
+    
+    # Logs
+    path('api/logs/', logs_api, name='logs_api'),
 ]

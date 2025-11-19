@@ -16,6 +16,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 from django.http import FileResponse
+from django.http import JsonResponse
 
 # ====================================================
 # --- Utilidades internas para Roles/Permisos ---
@@ -1113,3 +1114,12 @@ def reporte_ventas(request):
         'consulta_realizada': consulta_realizada,
         'total_ventas': total_ventas,
     })
+    
+# ====================================================
+# --- Funciones para Logs ---
+# ====================================================
+@login_required_custom
+def logs_api(request):
+    logs = Log.objects.all().order_by('-fecha')  # Sin límite, todos los logs
+    data = [{'detalles': log.detalles, 'fecha': str(log.fecha)} for log in logs]
+    return JsonResponse(data, safe=False)
