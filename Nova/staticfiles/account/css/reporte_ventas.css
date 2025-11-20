@@ -159,13 +159,14 @@ body.reporte-ventas {
     margin-bottom: 20px;
 }
 
-/* Label para las fechas */
-.date-label {
+/* Label para fechas + producto */
+.filter-form label {
     font-weight: bold;
     margin-bottom: 5px;
     display: block;
 }
 
+/* INPUTS */
 .form-control {
     width: 100%;
     padding: 10px;
@@ -176,22 +177,35 @@ body.reporte-ventas {
 /* Más espacio entre columnas */
 .row {
     display: flex;
-    gap: 25px; /* Aumenta el espacio entre columnas */
+    gap: 25px;
     margin-bottom: 10px;
 }
 
-/* Para que el botón Filtrar no quede pegado */
+/* Botón Filtrar */
 .filter-btn-wrapper {
     min-width: 120px;
     display: flex;
     align-items: flex-end;
 }
 
+/* Distribución de columnas */
 .col-md-3, .col-md-2 {
     flex: 1;
 }
 
-.col-md-3 { flex: 1.5; }
+.col-md-3 { 
+    flex: 1.5; /* Mantiene todo alineado correctamente */
+}
+
+/* === CORRECCIÓN: hacer el select de Producto más largo === */
+.filter-form select {
+    width: 105%;
+}
+
+/* === CORRECCIÓN: alinear verticalmente el select con las fechas === */
+.filter-form select.form-control {
+    margin-top: 0px;
+}
 
 /* Tabla */
 .products-table {
@@ -270,10 +284,12 @@ body.reporte-ventas {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     z-index: 1000;
 }
+
 .help-btn:hover {
     background: #e0a800;
     transform: scale(1.1);
 }
+
 .modal {
     position: fixed;
     z-index: 1001;
@@ -283,6 +299,7 @@ body.reporte-ventas {
     height: 100%;
     background-color: rgba(0,0,0,0.5);
 }
+
 .modal-content {
     background: white;
     margin: 15% auto;
@@ -292,6 +309,7 @@ body.reporte-ventas {
     max-width: 500px;
     position: relative;
 }
+
 .close {
     position: absolute;
     top: 10px;
@@ -300,6 +318,7 @@ body.reporte-ventas {
     cursor: pointer;
     color: #aaa;
 }
+
 .close:hover {
     color: black;
 }

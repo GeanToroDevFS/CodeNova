@@ -270,3 +270,18 @@ body.kardex-lista {
 .close:hover {
     color: black;
 }
+
+/* 🔧 Ajustes solicitados para filtros */
+.filter-form .row {
+    align-items: flex-end;   /* Alinea todas las columnas a la misma altura */
+}
+
+.filter-form .col-md-2 {
+    margin-right: 20px;      /* Separación entre Fecha Inicio y Fecha Fin */
+}
+
+.filter-form button.btn {
+    width: auto;
+    padding: 10px 18px;      /* Tamaño compacto */
+    white-space: nowrap;     /* Evita que el texto se corte */
+}
