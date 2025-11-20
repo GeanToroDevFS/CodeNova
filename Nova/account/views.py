@@ -17,6 +17,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 from django.http import FileResponse
 from django.http import JsonResponse
+from django.utils.timezone import make_aware
+from datetime import datetime
 
 # ====================================================
 # --- Utilidades internas para Roles/Permisos ---
@@ -1001,7 +1003,8 @@ def venta_crear(request):
                         cantidad=cant,  # Positivo
                         stock_anterior=stock_anterior, 
                         motivo='venta', 
-                        usuario=request.user
+                        usuario=request.user,
+                        fecha=venta.fecha  # ← AGREGAR ESTO: Fuerza la fecha exacta de la venta
                     )
                     total += precio_en_cop * cant  # Suma en COP
                 else:
@@ -1023,13 +1026,23 @@ def venta_crear(request):
 @role_required(module='productos', action='leer')  # Asumir permisos en productos
 def kardex(request):
     producto_id = request.GET.get('producto')
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
     kardex_entries = Kardex.objects.all().order_by('fecha')  # Ordenar por fecha
+    
     if producto_id:
         kardex_entries = kardex_entries.filter(producto_id=producto_id)
+    if fecha_inicio:
+        kardex_entries = kardex_entries.filter(fecha__date__gte=fecha_inicio)
+    if fecha_fin:
+        kardex_entries = kardex_entries.filter(fecha__date__lte=fecha_fin)
     productos = Producto.objects.all()
     return render(request, 'account/kardex.html', {
         'kardex_entries': kardex_entries,
         'productos': productos,
+        'producto_id': producto_id,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
     })
 
 @login_required_custom
@@ -1037,34 +1050,48 @@ def kardex(request):
 def reporte_ventas(request):
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
+    producto_id = request.GET.get('producto')
     exportar = request.GET.get('exportar') == '1'
     ventas = Venta.objects.select_related('usuario').prefetch_related('detalleventa_set__producto').all()
     if fecha_inicio:
-        ventas = ventas.filter(fecha__gte=fecha_inicio)
+        fecha_inicio_aware = make_aware(datetime.strptime(fecha_inicio, '%Y-%m-%d'))
+        ventas = ventas.filter(fecha__gte=fecha_inicio_aware)
     if fecha_fin:
-        ventas = ventas.filter(fecha__lte=fecha_fin)
+        # Para fecha_fin, incluir todo el día agregando 23:59:59
+        fecha_fin_aware = make_aware(datetime.strptime(fecha_fin + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
+        ventas = ventas.filter(fecha__lte=fecha_fin_aware)
+    if producto_id:
+        ventas = ventas.filter(detalleventa__producto_id=producto_id).distinct()
     total_ventas = ventas.count()
-    consulta_realizada = any([fecha_inicio, fecha_fin])
+    consulta_realizada = any([fecha_inicio, fecha_fin, producto_id])
     
     # Crear diccionario de movimientos por venta
     movimientos_por_venta = {}
     for venta in ventas:
-        movimientos = Kardex.objects.filter(
+        kardex_filter = Kardex.objects.filter(
             producto__in=venta.detalleventa_set.values_list('producto', flat=True),
-            fecha__date=venta.fecha.date()
-        ).order_by('fecha')
-        movimientos_por_venta[venta.id] = movimientos
+            fecha__date=venta.fecha.date()  # Solo día, sin hora
+        )
+        if producto_id:  # Si hay filtro por producto, limita movimientos a ese producto
+            kardex_filter = kardex_filter.filter(producto_id=producto_id)
+        movimientos_por_venta[venta.id] = kardex_filter.order_by('fecha')
+        
+        # ← MOVER EL PRINT AQUÍ (después de asignar el valor)
+        movimientos = movimientos_por_venta[venta.id]
+        print(f"Venta {venta.id}: {movimientos.count()} movimientos")
+    
+    productos = Producto.objects.all()  # Para el dropdown de productos
     
     if exportar:
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         elements = []
         styles = getSampleStyleSheet()
-    
+        
         # Título
         title = Paragraph("Reporte de Ventas", styles['Heading1'])
         elements.append(title)
-    
+        
         # Tabla de Ventas
         data_ventas = [['Fecha', 'Usuario', 'Productos', 'Total']]
         for v in ventas:
@@ -1080,14 +1107,14 @@ def reporte_ventas(request):
             ('FONTSIZE', (0, 0), (-1, -1), 8),
         ]))
         elements.append(table_ventas)
-    
+        
         # Espacio
         elements.append(Paragraph("<br/><br/>", styles['Normal']))
         
         # Título de Movimientos
         title_mov = Paragraph("Movimientos de Kardex", styles['Heading2'])
         elements.append(title_mov)
-    
+        
         # Tabla de Movimientos
         data_mov = [['Producto', 'Tipo', 'Stock Anterior', 'Cantidad Movida', 'Stock Actual', 'Motivo', 'Fecha']]
         for v in ventas:
@@ -1113,6 +1140,10 @@ def reporte_ventas(request):
     return render(request, 'account/reporte_ventas.html', {
         'ventas': ventas,
         'movimientos_por_venta': movimientos_por_venta,
+        'productos': productos,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
+        'producto_id': producto_id,
         'consulta_realizada': consulta_realizada,
         'total_ventas': total_ventas,
     })
