@@ -74,13 +74,22 @@
 
         <form method="get" class="filter-form">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label>Producto</label>
                     <select name="producto" class="form-control">
                         <option value="">Todos los Productos</option>
                         {% for prod in productos %}
-                        <option value="{{ prod.id }}" {% if request.GET.producto == prod.id|stringformat:"s" %}selected{% endif %}>{{ prod.nombre }}</option>
+                        <option value="{{ prod.id }}" {% if producto_id == prod.id|stringformat:"s" %}selected{% endif %}>{{ prod.nombre }}</option>
                         {% endfor %}
                     </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Fecha Inicio</label>
+                    <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+                </div>
+                <div class="col-md-2">
+                    <label>Fecha Fin</label>
+                    <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary">
