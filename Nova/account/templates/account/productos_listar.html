@@ -8,6 +8,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
+<!-- Botón de ayuda flotante -->
+<button id="help-btn" class="help-btn" title="Ayuda">
+    <i class="fas fa-question-circle"></i>
+</button>
+
+<!-- Modal de ayuda -->
+<div id="help-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Instructivo: Gestión de Productos</h2>
+        <p>Esta vista lista todos los productos. Puedes crear, editar o eliminar productos si tienes permisos.</p>
+        <ul>
+            <li><strong>Nuevo Producto:</strong> Haz clic en "Nuevo Producto" para agregar uno.</li>
+            <li><strong>Editar:</strong> Usa el ícono de editar en la fila del producto.</li>
+            <li><strong>Eliminar:</strong> Usa el ícono de eliminar; confirma la acción.</li>
+            <li><strong>Stock:</strong> Productos con stock bajo aparecen en rojo.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const helpBtn = document.getElementById('help-btn');
+    const modal = document.getElementById('help-modal');
+    const closeBtn = document.querySelector('.close');
+    
+    helpBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+</script>
+
 <body class="productos-lista">
     <!-- 🔹 Franja superior -->
     <div class="topbar">
