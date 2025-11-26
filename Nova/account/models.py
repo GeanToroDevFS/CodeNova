@@ -1,6 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser 
+from django.contrib.auth.models import AbstractUser, User
 from django.utils import timezone
+from django.db.models import Sum
+import uuid
+from decimal import Decimal
 
 class Usuario(AbstractUser):
     rol = models.ForeignKey('Rol', on_delete=models.SET_NULL, null=True, blank=True)
@@ -154,14 +157,38 @@ class Venta(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     estado = models.BooleanField(default=True)
+    # Campos nuevos agregados
+    cliente_nombre = models.CharField(max_length=100, blank=True, null=True)
+    cliente_cedula = models.CharField(max_length=20, blank=True, null=True)
+    nit_empresa = models.CharField(max_length=20, default='202266833-4')
+    numero_factura = models.IntegerField(unique=True, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.numero_factura:
+            last_factura = Venta.objects.order_by('-numero_factura').first()
+            self.numero_factura = (last_factura.numero_factura + 1) if last_factura else 1
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Venta {self.id} - {self.usuario.username}"
+        return f"Venta {self.numero_factura or self.id} - {self.usuario.username}"
 
 class DetalleVenta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    # Campos nuevos agregados
+    iva = models.DecimalField(max_digits=5, decimal_places=4, default=0.19)
+    precio_con_iva = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.precio_con_iva = self.precio_unitario * (Decimal(1) + Decimal(self.iva))  # Convierte self.iva a Decimal
+        super().save(*args, **kwargs)
+
+    @property
+    def subtotal(self):
+        return self.cantidad * self.precio_con_iva
+
     def __str__(self):
         return f"{self.producto.nombre} x{self.cantidad}"
 
