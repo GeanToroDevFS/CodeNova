@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm # Importar formularios de usuario de Django
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import Producto, Categoria, Proveedor, Almacen, Rol, Usuario
 
 class LoginForm(forms.Form):
@@ -189,6 +189,8 @@ class RolForm(forms.ModelForm):
         }
 
 class VentaForm(forms.Form):
+    cliente_nombre = forms.CharField(max_length=100, required=True, label="Nombre del Cliente")
+    cliente_cedula = forms.CharField(max_length=20, required=True, label="Cédula del Cliente")
     productos = forms.ModelMultipleChoiceField(queryset=Producto.objects.filter(estado=True), widget=forms.CheckboxSelectMultiple)
     cantidades = forms.CharField(widget=forms.HiddenInput)  # Manejar dinámicamente en template
 class KardexForm(forms.Form):

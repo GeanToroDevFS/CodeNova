@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.db.models import Count, Sum 
+from django.db.models import Count, Sum, Q 
 from .forms import (
     LoginForm, CustomUserCreationForm, CustomUserChangeForm,
     AlmacenForm, ProveedorForm, CategoriaForm, ProductoForm, RolForm
@@ -14,11 +14,18 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
 from io import BytesIO
 from django.http import FileResponse
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.utils.timezone import make_aware
 from datetime import datetime
+import json
+import qrcode
+import io
+
 
 # ====================================================
 # --- Utilidades internas para Roles/Permisos ---
@@ -26,7 +33,7 @@ from datetime import datetime
 
 def _get_dashboard_modules():
     """Módulos visibles en el dashboard usados en la matriz de permisos."""
-    return ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles', 'ventas', 'kardex']
+    return ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles', 'ventas', 'kardex', 'logs']
 
 
 def _get_crud_actions():
@@ -976,6 +983,10 @@ def ventas_listar(request):
 @role_required(module='ventas', action='crear')
 def venta_crear(request):
     if request.method == 'POST':
+        # Procesar campos nuevos del cliente
+        cliente_nombre = request.POST.get('cliente_nombre')
+        cliente_cedula = request.POST.get('cliente_cedula')
+        
         productos_ids = []
         cantidades = []
         for key, value in request.POST.items():
@@ -988,38 +999,149 @@ def venta_crear(request):
             messages.error(request, 'Debe agregar al menos un producto con cantidad válida.')
             return redirect('venta_crear')
         
-        venta = Venta.objects.create(usuario=request.user, total=0)
+        venta = Venta.objects.create(
+            usuario=request.user, 
+            total=0, 
+            cliente_nombre=cliente_nombre, 
+            cliente_cedula=cliente_cedula
+        )
         total = 0
         for prod_id, cant in zip(productos_ids, cantidades):
             try:
                 prod = Producto.objects.get(id=prod_id)
                 stock_anterior = prod.cantidad
                 if prod.reducir_stock(cant):
-                    precio_en_cop = prod.precio_en_cop()  # Nuevo: precio convertido a COP
-                    DetalleVenta.objects.create(venta=venta, producto=prod, cantidad=cant, precio_unitario=precio_en_cop)
+                    precio_en_cop = prod.precio_en_cop()
+                    detalle = DetalleVenta.objects.create(
+                        venta=venta, 
+                        producto=prod, 
+                        cantidad=cant, 
+                        precio_unitario=precio_en_cop
+                    )
+                    # Suma el subtotal (que incluye IVA)
+                    total += detalle.subtotal
                     Kardex.objects.create(
                         producto=prod, 
                         tipo='salida', 
-                        cantidad=cant,  # Positivo
+                        cantidad=cant,
                         stock_anterior=stock_anterior, 
                         motivo='venta', 
                         usuario=request.user,
-                        fecha=venta.fecha  # ← AGREGAR ESTO: Fuerza la fecha exacta de la venta
+                        fecha=venta.fecha
                     )
-                    total += precio_en_cop * cant  # Suma en COP
                 else:
                     messages.error(request, f'Stock insuficiente para {prod.nombre}.')
                     return redirect('venta_crear')
             except Producto.DoesNotExist:
                 messages.error(request, 'Producto no encontrado.')
                 return redirect('venta_crear')
-        venta.total = total
+        
+        venta.total = total  # Ahora incluye IVA
         venta.save()
-        messages.success(request, 'Venta realizada exitosamente.')
+        messages.success(request, f'Venta creada exitosamente. Número de factura: {venta.numero_factura}.')
         return redirect('ventas_listar')
     
     productos = Producto.objects.filter(estado=True)
     return render(request, 'account/venta_form.html', {'productos': productos, 'titulo': 'Nueva Venta'})
+
+
+@login_required_custom
+def generar_factura(request, venta_id):
+    venta = get_object_or_404(Venta, id=venta_id)
+    detalles = DetalleVenta.objects.filter(venta=venta)
+    
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    
+    # Logo (ajusta la ruta si es necesario)
+    try:
+        logo_path = 'account/static/account/img/StockNova.jpg'
+        p.drawImage(ImageReader(logo_path), 50, height - 100, width=100, height=50)
+    except:
+        pass  # Si no hay logo, continúa
+    
+    # Título
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(200, height - 60, "Factura - StockNova")
+    
+    # Datos de la factura
+    p.setFont("Helvetica", 10)
+    p.drawString(50, height - 120, f"NIT Emisor: {venta.nit_empresa}")
+    p.drawString(50, height - 140, f"Fecha: {venta.fecha.strftime('%Y-%m-%d %H:%M')}")
+    p.drawString(50, height - 160, f"Número Factura: {venta.numero_factura}")
+    p.drawString(50, height - 180, f"Comprador: {venta.cliente_nombre} (Cédula: {venta.cliente_cedula})")
+    p.drawString(50, height - 200, f"Vendedor: {venta.usuario.username}")
+    
+    # Tabla de productos
+    y = height - 240
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(50, y, "Producto")
+    p.drawString(250, y, "Cant.")
+    p.drawString(300, y, "Precio Unit.")
+    p.drawString(380, y, "IVA (19%)")
+    p.drawString(450, y, "Subtotal")
+    y -= 20
+    
+    p.setFont("Helvetica", 9)
+    productos_lista = []
+    for detalle in detalles:
+        p.drawString(50, y, detalle.producto.nombre[:20])
+        p.drawString(250, y, str(detalle.cantidad))
+        p.drawString(300, y, f"${detalle.precio_unitario}")
+        p.drawString(380, y, f"${detalle.iva * detalle.precio_unitario * detalle.cantidad:.2f}")
+        p.drawString(450, y, f"${detalle.subtotal:.2f}")
+        productos_lista.append({
+            "nombre": detalle.producto.nombre,
+            "cantidad": detalle.cantidad,
+            "precio_unitario": str(detalle.precio_unitario)
+        })
+        y -= 15
+    
+    # Total recalculado (correcto)
+    p.setFont("Helvetica-Bold", 12)
+    total_final = sum(det.subtotal for det in detalles)
+    p.drawString(400, y - 20, f"Total: ${total_final:.2f}")
+    
+    # ===============================
+    # QR MÁS GRANDE Y MÁS ABAJO
+    # ===============================
+    qr_data = json.dumps({
+        "emisor": "StockNova",
+        "nit_emisor": venta.nit_empresa,
+        "numero_factura": venta.numero_factura,
+        "fecha": venta.fecha.strftime('%Y-%m-%d %H:%M'),
+        "comprador": venta.cliente_nombre,
+        "cedula_comprador": venta.cliente_cedula,
+        "vendedor": venta.usuario.username,
+        "productos": productos_lista,
+        "total": str(venta.total)
+    })
+
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    img = qr.make_image(fill='black', back_color='white')
+    img_buffer = io.BytesIO()
+    img.save(img_buffer, format='PNG')
+    img_buffer.seek(0)
+
+    # ⬇ QR aumentado y más abajo
+    p.drawImage(
+        ImageReader(img_buffer),
+        50,             # posición horizontal
+        y - 180,        # más abajo que antes (120 → 180)
+        width=150,      # antes 100
+        height=150      # antes 100
+    )
+    
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+    
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="factura_{venta.numero_factura}.pdf"'
+    return response
 
 
 @login_required_custom
@@ -1183,3 +1305,36 @@ def logs_api(request):
     logs = Log.objects.all().order_by('-fecha')  # Sin límite, todos los logs
     data = [{'detalles': log.detalles, 'fecha': str(log.fecha)} for log in logs]
     return JsonResponse(data, safe=False)
+
+
+@login_required_custom
+@role_required(module='logs', action='leer')
+def logs_listar(request):
+    logs = Log.objects.all().order_by('-fecha')
+    
+    # Filtros
+    fecha_desde = request.GET.get('fecha_desde')
+    fecha_hasta = request.GET.get('fecha_hasta')
+    usuario = request.GET.get('usuario')
+    modelo = request.GET.get('modelo')
+    accion = request.GET.get('accion')
+    
+    if fecha_desde:
+        logs = logs.filter(fecha__gte=fecha_desde)
+    if fecha_hasta:
+        logs = logs.filter(fecha__lte=fecha_hasta)
+    if usuario:
+        logs = logs.filter(Q(usuario__username__icontains=usuario))
+    if modelo:
+        logs = logs.filter(modelo__icontains=modelo)
+    if accion:
+        logs = logs.filter(accion__icontains=accion)
+    
+    return render(request, 'account/logs_listar.html', {
+        'logs': logs,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
+        'usuario': usuario,
+        'modelo': modelo,
+        'accion': accion,
+    })

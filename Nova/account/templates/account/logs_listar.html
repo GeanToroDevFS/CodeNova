@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Logs</title>
+    <link rel="stylesheet" href="{% static 'account/css/logs_listar.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<!-- Botón de ayuda flotante -->
+<button id="help-btn" class="help-btn" title="Ayuda">
+    <i class="fas fa-question-circle"></i>
+</button>
+
+<!-- Modal de ayuda -->
+<div id="help-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Instructivo: Gestión de Logs</h2>
+        <p>Historial de logs del sistema. Incluye filtros por fecha, usuario, módulo y acción.</p>
+        <ul>
+            <li><strong>Filtros:</strong> Usa los campos para buscar logs específicos.</li>
+            <li><strong>Detalles:</strong> Revisa acciones realizadas en el sistema.</li>
+            <li><strong>Permisos:</strong> Solo usuarios autorizados pueden ver logs.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const helpBtn = document.getElementById('help-btn');
+    const modal = document.getElementById('help-modal');
+    const closeBtn = document.querySelector('.close');
+    
+    helpBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+</script>
+
+<body class="logs-lista">
+    <!-- 🔹 Franja superior -->
+    <div class="topbar">
+        <div class="user-info">👤 {{ user.username }}</div>
+        <div class="actions">
+            <a href="{% url 'dashboard' %}" class="home-btn">🏠 Home</a>
+            <a href="{% url 'logout' %}" class="logout-btn">⏻ Cerrar sesión</a>
+        </div>
+    </div>
+
+    <!-- 🔹 Contenido -->
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Gestión de Logs</h1>
+        </div>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Formulario de filtros -->
+        <form method="get" class="filters-form">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Fecha Desde:</label>
+                    <input type="date" name="fecha_desde" value="{{ fecha_desde }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label>Fecha Hasta:</label>
+                    <input type="date" name="fecha_hasta" value="{{ fecha_hasta }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label>Usuario:</label>
+                    <input type="text" name="usuario" value="{{ usuario }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label>Módulo:</label>
+                    <input type="text" name="modelo" value="{{ modelo }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label>Acción:</label>
+                    <input type="text" name="accion" value="{{ accion }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary mt-4">Filtrar</button>
+                </div>
+            </div>
+        </form>
+
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Módulo</th>
+                    <th>Acción</th>
+                    <th>Detalles</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{% if log.usuario %}{{ log.usuario.username }}{% else %}N/A{% endif %}</td>
+                    <td>{{ log.modelo }}</td>
+                    <td>{{ log.accion }}</td>
+                    <td>{{ log.detalles }}</td>
+                    <td>{{ log.fecha|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="no-products">
+                        <i class="fas fa-history" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                        No hay logs registrados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

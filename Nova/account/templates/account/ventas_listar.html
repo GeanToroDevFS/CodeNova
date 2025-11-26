@@ -85,6 +85,7 @@
                     <th>Fecha</th>
                     <th>Productos</th>
                     <th>Total</th>
+                    <th>Acciones</th>  <!-- Nueva columna agregada -->
                 </tr>
             </thead>
             <tbody>
@@ -104,10 +105,15 @@
                         </ul>
                     </td>
                     <td>${{ venta.total }}</td>
+                    <td>  <!-- Nueva celda agregada -->
+                        <a href="{% url 'generar_factura' venta.id %}" class="btn btn-sm btn-primary" title="Descargar Factura">
+                            <i class="fas fa-download"></i> Factura
+                        </a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="no-products">
+                    <td colspan="6" class="no-products">  <!-- Cambié colspan de 5 a 6 por la nueva columna -->
                         <i class="fas fa-receipt" style="font-size: 24px; margin-bottom: 10px;"></i><br>
                         No hay ventas registradas
                     </td>

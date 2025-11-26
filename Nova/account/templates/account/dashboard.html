@@ -154,6 +154,10 @@
             {% if 'kardex' in modulos_permitidos %}
                 <a href="{% url 'kardex' %}">📈 Kardex</a>  <!-- Enlace completo para Kardex -->
             {% endif %}
+            <!-- Nuevo botón de logs agregado aquí -->
+            {% if 'logs' in modulos_permitidos %}
+                <a href="{% url 'logs_listar' %}">📋 Logs</a>
+            {% endif %}
         </div>
     </div>
     <script>

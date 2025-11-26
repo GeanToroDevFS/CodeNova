@@ -8,7 +8,7 @@ from .views import (
     productos_listar, producto_crear, producto_editar, producto_eliminar,
     roles_listar, roles_crear, roles_editar, roles_eliminar, informes_listar, inventario_completo,
     reporte_usuarios, reporte_proveedores, reporte_almacenes, reporte_categorias, reporte_roles,
-    ventas_listar, venta_crear, kardex, reporte_ventas, logs_api,
+    ventas_listar, venta_crear, kardex, reporte_ventas, logs_api, logs_listar, generar_factura,
 )
 
 urlpatterns = [
@@ -65,6 +65,9 @@ urlpatterns = [
     path('ventas/', ventas_listar, name='ventas_listar'),
     path('ventas/crear/', venta_crear, name='venta_crear'),
     
+    #Factura
+    path('factura/<int:venta_id>/', generar_factura, name='generar_factura'),
+    
     # Kardex
     path('kardex/', kardex, name='kardex'),
     
@@ -73,4 +76,5 @@ urlpatterns = [
     
     # Logs
     path('api/logs/', logs_api, name='logs_api'),
+    path('logs/', logs_listar, name='logs_listar'),
 ]
