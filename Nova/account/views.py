@@ -24,7 +24,10 @@ from django.utils.timezone import make_aware
 from datetime import datetime
 import json
 import qrcode
+import hashlib
 import io
+from barcode import Code128
+from barcode.writer import ImageWriter
 
 
 # ====================================================
@@ -1050,6 +1053,10 @@ def generar_factura(request, venta_id):
     venta = get_object_or_404(Venta, id=venta_id)
     detalles = DetalleVenta.objects.filter(venta=venta)
     
+    # Datos para CUFE simulado (educativo)
+    cufe_data = f"{venta.nit_empresa}{venta.numero_factura}{venta.fecha.strftime('%Y%m%d%H%M%S')}{venta.total}"
+    cufe = hashlib.sha384(cufe_data.encode()).hexdigest().upper()
+    
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
@@ -1063,18 +1070,19 @@ def generar_factura(request, venta_id):
     
     # Título
     p.setFont("Helvetica-Bold", 16)
-    p.drawString(200, height - 60, "Factura - StockNova")
+    p.drawString(200, height - 60, "Factura Digital - StockNova")
     
     # Datos de la factura
     p.setFont("Helvetica", 10)
     p.drawString(50, height - 120, f"NIT Emisor: {venta.nit_empresa}")
     p.drawString(50, height - 140, f"Fecha: {venta.fecha.strftime('%Y-%m-%d %H:%M')}")
     p.drawString(50, height - 160, f"Número Factura: {venta.numero_factura}")
-    p.drawString(50, height - 180, f"Comprador: {venta.cliente_nombre} (Cédula: {venta.cliente_cedula})")
-    p.drawString(50, height - 200, f"Vendedor: {venta.usuario.username}")
+    p.drawString(50, height - 180, f"CUFE: {cufe}")  # CUFE simulado
+    p.drawString(50, height - 200, f"Comprador: {venta.cliente_nombre} (Cédula: {venta.cliente_cedula})")
+    p.drawString(50, height - 220, f"Vendedor: {venta.usuario.username}")
     
     # Tabla de productos
-    y = height - 240
+    y = height - 260
     p.setFont("Helvetica-Bold", 10)
     p.drawString(50, y, "Producto")
     p.drawString(250, y, "Cant.")
@@ -1115,7 +1123,8 @@ def generar_factura(request, venta_id):
         "cedula_comprador": venta.cliente_cedula,
         "vendedor": venta.usuario.username,
         "productos": productos_lista,
-        "total": str(venta.total)
+        "total": str(venta.total),
+        "cufe": cufe  # Agregado CUFE al QR
     })
 
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -1135,6 +1144,13 @@ def generar_factura(request, venta_id):
         height=150      # antes 100
     )
     
+    # Código de Barras (simulado)
+    barcode = Code128(cufe, writer=ImageWriter())
+    barcode_buffer = io.BytesIO()
+    barcode.write(barcode_buffer)
+    barcode_buffer.seek(0)
+    p.drawImage(ImageReader(barcode_buffer), 250, y - 180, width=200, height=50)
+    
     p.showPage()
     p.save()
     buffer.seek(0)
@@ -1142,6 +1158,7 @@ def generar_factura(request, venta_id):
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="factura_{venta.numero_factura}.pdf"'
     return response
+
 
 
 @login_required_custom
@@ -1320,15 +1337,22 @@ def logs_listar(request):
     accion = request.GET.get('accion')
     
     if fecha_desde:
-        logs = logs.filter(fecha__gte=fecha_desde)
+        fecha_desde_aware = make_aware(datetime.strptime(fecha_desde + ' 00:00:00', '%Y-%m-%d %H:%M:%S'))
+        logs = logs.filter(fecha__gte=fecha_desde_aware)
     if fecha_hasta:
-        logs = logs.filter(fecha__lte=fecha_hasta)
-    if usuario:
+        fecha_hasta_aware = make_aware(datetime.strptime(fecha_hasta + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
+        logs = logs.filter(fecha__lte=fecha_hasta_aware)
+    if usuario and usuario not in ["", "None", None]:
         logs = logs.filter(Q(usuario__username__icontains=usuario))
-    if modelo:
+    if modelo and modelo not in ["", "None", None]:
         logs = logs.filter(modelo__icontains=modelo)
-    if accion:
+    if accion and accion not in ["", "None", None]:
         logs = logs.filter(accion__icontains=accion)
+    
+    # Datos para selects
+    usuarios = Usuario.objects.all().order_by('username')
+    modelos = ['productos', 'usuarios', 'proveedores', 'almacenes', 'categorias', 'roles', 'informes', 'ventas', 'kardex', 'logs']  # Lista fija de módulos principales
+    acciones = ['crear', 'leer', 'actualizar', 'eliminar', 'login', 'logout', 'exportar']  # Agregado 'exportar'
     
     return render(request, 'account/logs_listar.html', {
         'logs': logs,
@@ -1337,4 +1361,7 @@ def logs_listar(request):
         'usuario': usuario,
         'modelo': modelo,
         'accion': accion,
+        'usuarios': usuarios,
+        'modelos': modelos,
+        'acciones': acciones,
     })

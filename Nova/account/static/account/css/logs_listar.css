@@ -1,84 +1,113 @@
-/* Estilos para logs_listar.html - Similar a ventas_listar.css y roles.css */
-
-body.logs-lista {
+/* Estilos generales */
+body {
     font-family: 'Jost', sans-serif;
+    background-color: #f5f5f5;
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    color: #333;
+}
+
+/* Estilos específicos para lista de logs */
+body.logs-lista {
+    margin: 0;
+    padding-top: 120px;
+    background: #f0f0f0;
 }
 
 /* Topbar */
 .topbar {
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
     position: fixed;
     top: 0;
-    width: 100%;
+    left: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     z-index: 1000;
+    height: 60px;
 }
 
-.user-info {
+.topbar .user-info {
     font-weight: bold;
-    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.actions a {
-    margin-left: 15px;
+.topbar .actions {
+    display: flex;
+    gap: 10px;
+    margin-right: 50px;
+}
+
+.topbar a {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
     text-decoration: none;
-    color: #667eea;
     font-weight: bold;
-    transition: color 0.3s;
+    cursor: pointer;
+    margin-left: 10px;
+    color: white;
 }
 
-.actions a:hover {
-    color: #764ba2;
+.topbar .home-btn {
+    background: #17a2b8;
+}
+
+.topbar .logout-btn {
+    background: #dc3545;
+}
+
+.topbar a:hover {
+    opacity: 0.9;
 }
 
 /* Container */
 .container {
-    margin-top: 80px;
-    padding: 20px;
+    width: 90%;
     max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 30px auto;
+    font-family: 'Jost', sans-serif;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .title {
-    color: #fff;
-    font-size: 2.5em;
+    font-size: 24px;
+    color: #333;
     margin: 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .btn {
-    background: #667eea;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: background 0.3s;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
 }
 
-.btn:hover {
-    background: #764ba2;
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
 }
 
 /* Messages */
@@ -89,80 +118,108 @@ body.logs-lista {
 }
 
 .messages li {
-    padding: 10px;
+    padding: 12px 15px;
     border-radius: 5px;
     margin-bottom: 10px;
+    text-align: center;
 }
 
-.messages .success {
-    background: #d4edda;
+.success {
+    background-color: #d4edda;
     color: #155724;
 }
 
-.messages .error {
-    background: #f8d7da;
+.error {
+    background-color: #f8d7da;
     color: #721c24;
 }
 
-/* Filters Form */
+/* Filters Form - CORREGIDO */
 .filters-form {
-    background: rgba(255, 255, 255, 0.9);
-    padding: 20px;
+    background: white;
+    padding: 20px 30px;
     border-radius: 10px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .row {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
+    align-items: flex-end;
+    justify-content: flex-start; /* 🔹 CAMBIADO: Alineación a la izquierda */
+    width: 100%;
 }
 
 .col-md-2 {
-    flex: 1 1 18%;
+    flex: 1;
     min-width: 150px;
+    max-width: 200px;
 }
 
+/* Específico para el botón - CORREGIDO */
+.btn-col {
+    flex: 0 0 auto;
+    margin-left: 0; /* 🔹 CAMBIADO: Quitado el auto */
+    align-self: flex-end; /* 🔹 Asegura alineación vertical */
+}
+
+.btn-filter {
+    white-space: nowrap;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px; /* 🔹 AÑADIDO: Ancho mínimo para el botón */
+}
+
+/* Asegurar que los inputs y selects tengan la misma altura */
 .form-control {
     width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 14px;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 /* Table */
 .products-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .products-table th,
 .products-table td {
-    padding: 15px;
+    padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .products-table th {
-    background: #667eea;
-    color: white;
-    font-weight: bold;
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
 }
 
 .products-table tr:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background-color: #f5f8fa;
 }
 
 .no-products {
     text-align: center;
-    color: #666;
-    font-style: italic;
+    padding: 30px;
+    color: #6c757d;
+    font-size: 16px;
 }
 
 /* Help Button and Modal */
@@ -170,20 +227,21 @@ body.logs-lista {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #667eea;
-    color: white;
+    background: #ffc107;
+    color: #212529;
     border: none;
     border-radius: 50%;
     width: 50px;
     height: 50px;
     font-size: 20px;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     z-index: 1000;
 }
 
 .help-btn:hover {
-    background: #764ba2;
+    background: #e0a800;
+    transform: scale(1.1);
 }
 
 .modal {
@@ -193,14 +251,12 @@ body.logs-lista {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-color: rgba(0,0,0,0.5);
 }
 
 .modal-content {
     background: white;
+    margin: 15% auto;
     padding: 20px;
     border-radius: 10px;
     width: 80%;
@@ -212,26 +268,90 @@ body.logs-lista {
     position: absolute;
     top: 10px;
     right: 15px;
-    font-size: 24px;
+    font-size: 28px;
     cursor: pointer;
-    color: #333;
+    color: #aaa;
 }
 
 .close:hover {
-    color: #667eea;
+    color: black;
+}
+
+/* Select2 Styles - CORREGIDO */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 5px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px !important;
+    padding-left: 8px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #6c757d !important;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+    .products-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .topbar .actions {
+        margin-right: 10px;
+    }
+    
     .row {
         flex-direction: column;
+        gap: 10px;
     }
+    
     .col-md-2 {
         flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
     }
-    .products-table th,
-    .products-table td {
-        padding: 10px;
-        font-size: 14px;
+    
+    .btn-col {
+        align-self: stretch; /* 🔹 Botón ocupa todo el ancho en móvil */
+    }
+    
+    .btn-filter {
+        width: 100%;
+    }
+    
+    .filters-form {
+        padding: 15px 20px;
+    }
+    
+    body.logs-lista {
+        padding-top: 140px;
+    }
+}
+
+/* Para pantallas muy grandes */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1300px;
+    }
+    
+    .col-md-2 {
+        max-width: 220px;
     }
 }
