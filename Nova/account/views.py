@@ -1365,3 +1365,49 @@ def logs_listar(request):
         'modelos': modelos,
         'acciones': acciones,
     })
+    
+# Registro de usuarios
+def user_register(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        nombres = request.POST.get('nombres')  # Agregado
+        apellidos = request.POST.get('apellidos')  # Agregado
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Validaciones básicas
+        if not username or not nombres or not apellidos or not email or not password:  # Actualizado
+            messages.error(request, 'Todos los campos son obligatorios.')
+            return redirect('login')
+
+        if Usuario.objects.filter(username=username).exists():
+            messages.error(request, 'El nombre de usuario ya existe.')
+            return redirect('login')
+
+        if Usuario.objects.filter(email=email).exists():
+            messages.error(request, 'El email ya está registrado.')
+            return redirect('login')
+
+        # Crear usuario
+        user = Usuario.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            nombres=nombres,  # Agregado
+            apellidos=apellidos,  # Agregado
+            estado=True,  # Activo por defecto
+            is_active=True
+        )
+        # Asignar rol por defecto (opcional, ajusta según tu lógica)
+        rol_default = Rol.objects.filter(nombre='Usuario', estado=True).first()
+        if rol_default:
+            user.rol = rol_default
+            user.save()
+
+        messages.success(request, 'Registro exitoso. Ahora puedes iniciar sesión.')
+        return redirect('login')
+
+    return redirect('login')  # Si no es POST, redirigir al login
