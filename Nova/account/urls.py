@@ -9,10 +9,12 @@ from .views import (
     roles_listar, roles_crear, roles_editar, roles_eliminar, informes_listar, inventario_completo,
     reporte_usuarios, reporte_proveedores, reporte_almacenes, reporte_categorias, reporte_roles,
     ventas_listar, venta_crear, kardex, reporte_ventas, logs_api, logs_listar, generar_factura,
+    user_register,
 )
 
 urlpatterns = [
     path('', user_login, name='login'), # La raíz de la app 'account' es el login
+    path('register/', user_register, name='register'),  # Agregado
     path('dashboard/', dashboard, name='dashboard'),
     path('logout/', user_logout, name='logout'),
 
